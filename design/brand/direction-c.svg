@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="tealBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9AE9DD"/><stop offset=".5" stop-color="#54C8BE"/><stop offset="1" stop-color="#268E98"/></linearGradient>
+    <linearGradient id="coralBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD0B4"/><stop offset=".5" stop-color="#FA987C"/><stop offset="1" stop-color="#D87578"/></linearGradient>
+    <radialGradient id="lampGlow"><stop stop-color="#F3F7B2"/><stop offset=".65" stop-color="#D2DF72"/><stop offset="1" stop-color="#A7C272"/></radialGradient>
+    <style>
+      text{font-family:'Helvetica Neue',Arial,sans-serif;fill:#1E3D3E}
+      .eyebrow{font-size:22px;font-weight:700;letter-spacing:3px}
+      .title{font-size:58px;font-weight:750;letter-spacing:-1.8px}
+      .subtitle{font-size:24px;font-weight:400}
+      .section{font-size:22px;font-weight:700;letter-spacing:1.5px}
+      .body{font-size:25px;font-weight:500}
+      .small{font-size:18px;font-weight:500}
+      .strong{font-weight:700}
+      .arabic{font-family:'SF Arabic','Arial',sans-serif;font-size:34px;font-weight:700;direction:rtl;unicode-bidi:plaintext}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#F4F6E9"/>
+  <rect x="0" y="0" width="1600" height="16" fill="#21545A"/>
+  <text x="84" y="78" class="eyebrow" fill="#21545A">MASAR / BRAND EXPLORATION</text>
+  <text x="1510" y="78" text-anchor="end" class="eyebrow" fill="#D2DF72">DIRECTION C</text>
+  <text x="82" y="168" class="title">The Open Horizon</text>
+  <text x="84" y="212" class="subtitle">More than one way forward; the learner chooses the next turn.</text>
+  <line x1="84" y1="246" x2="1516" y2="246" stroke="#D7DFDD" stroke-width="2"/>
+  <rect x="84" y="282" width="430" height="434" rx="30" fill="#fff" stroke="#DEE4E2"/>
+  <text x="115" y="326" class="section">SYMBOL IDEA</text>
+  <rect x="179" y="361" width="240" height="240" rx="54" fill="#21545A"/>
+  <g transform="translate(299,481)"><path d="M0 79 V-17 M0-17 C-8-54-55-68-93-59 M0-17 C11-60 54-70 92-58" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/><circle cx="-93" cy="-59" r="14" fill="#fff"/><circle cx="92" cy="-58" r="17" fill="#E8F09E"/><path d="M0 79 L-17 56 M0 79 L17 56" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/></g>
+  <text x="299" y="650" text-anchor="middle" class="small">symbol only · scalable route</text>
+  <rect x="542" y="282" width="467" height="434" rx="30" fill="#fff" stroke="#DEE4E2"/>
+  <text x="574" y="326" class="section">PALETTE</text>
+  <rect x="574" y="357" width="190" height="166" rx="21" fill="#21545A"/>
+  <rect x="781" y="357" width="190" height="166" rx="21" fill="#D2DF72"/>
+  <text x="575" y="565" class="small strong">PRIMARY</text><text x="575" y="594" class="body">#21545A</text>
+  <text x="782" y="565" class="small strong">SECONDARY</text><text x="782" y="594" class="body">#D2DF72</text>
+  <rect x="574" y="631" width="398" height="48" rx="14" fill="#F4F6E9" stroke="#CCD7D3"/>
+  <text x="590" y="663" class="small">BACKGROUND  #F4F6E9</text>
+  <rect x="1037" y="282" width="479" height="434" rx="30" fill="#fff" stroke="#DEE4E2"/>
+  <text x="1069" y="326" class="section">MENTOR MOOD / NOT FINAL</text>
+  <g transform="translate(1275,488)"><ellipse cx="0" cy="153" rx="84" ry="16" fill="#163C40" opacity=".16"/>
+      <path d="M-42-110 L42-110 L75-45 L59 95 L0 132 L-59 95 L-75-45Z" fill="#21545A"/>
+      <path d="M-32-89 L32-89 L53-40 L44 76 L0 107 L-44 76 L-53-40Z" fill="url(#lampGlow)"/>
+      <path d="M-42-110 L-63-127 M42-110 L63-127" stroke="#21545A" stroke-width="13" stroke-linecap="round"/>
+      <path d="M-57 34 Q-93 29-97-2 M57 34 Q93 29 97-2" stroke="#21545A" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <circle cx="-19" cy="-13" r="6" fill="#1E3D3E"/><circle cx="19" cy="-13" r="6" fill="#1E3D3E"/>
+      <path d="M-13 15 Q0 25 13 15" fill="none" stroke="#1E3D3E" stroke-width="5" stroke-linecap="round"/></g>
+  <text x="1069" y="655" class="small">Grounded focus · independence · calm</text>
+  <text x="84" y="752" class="section">FIXED MASTERY STATUS COLORS</text>
+  <g transform="translate(85,763)"><rect width="211" height="86" rx="17" fill="#fff" stroke="#DCE2E4"/>
+    <circle cx="24" cy="29" r="9" fill="#98A2AD"/><text x="42" y="35" class="small strong">UNKNOWN</text>
+    <text x="21" y="68" class="body" fill="#98A2AD">—</text></g><g transform="translate(317,763)"><rect width="211" height="86" rx="17" fill="#fff" stroke="#DCE2E4"/>
+    <circle cx="24" cy="29" r="9" fill="#D94E5D"/><text x="42" y="35" class="small strong">WEAK</text>
+    <text x="21" y="68" class="body" fill="#D94E5D">28%</text></g><g transform="translate(549,763)"><rect width="211" height="86" rx="17" fill="#fff" stroke="#DCE2E4"/>
+    <circle cx="24" cy="29" r="9" fill="#E6A13A"/><text x="42" y="35" class="small strong">MEDIUM</text>
+    <text x="21" y="68" class="body" fill="#E6A13A">54%</text></g><g transform="translate(781,763)"><rect width="211" height="86" rx="17" fill="#fff" stroke="#DCE2E4"/>
+    <circle cx="24" cy="29" r="9" fill="#2E9F72"/><text x="42" y="35" class="small strong">STRONG</text>
+    <text x="21" y="68" class="body" fill="#2E9F72">82%</text></g>
+  <rect x="1051" y="763" width="465" height="167" rx="24" fill="#fff" stroke="#DCE2E4"/>
+  <text x="1082" y="806" class="section">TYPE PAIRING</text>
+  <text x="1082" y="844" class="body">IBM Plex Sans Arabic + DM Sans</text>
+  <text x="1082" y="888" class="arabic">اختار دربك</text>
+  <text x="84" y="961" class="small">Lantern guide: tall faceted frame, inner glow, steady presence.</text>
+  <text x="1516" y="961" text-anchor="end" class="small">MASAR · STEP 1 / CHOOSE A DIRECTION</text>
+  </svg>
