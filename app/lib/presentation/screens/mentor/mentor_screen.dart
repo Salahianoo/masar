@@ -109,8 +109,8 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
         (_selectedSubjectId != null && enrolled.any((e) => e.subjectId == _selectedSubjectId)
           ? _selectedSubjectId : enrolled.firstOrNull?.subjectId);
     return Scaffold(
-      appBar: AppBar(title: Text(mentorName)),
       body: SafeArea(child: Column(children: [
+        _MentorHeader(mentorName: mentorName),
         if (widget.subjectId == null && enrolled.length > 1) Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: DropdownButtonFormField<String>(
@@ -140,19 +140,21 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                     onExplainTopic: () => _explainTopic(subjectId),
                   ),
                   for (final message in _messages)
-                    Align(
-                      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                        constraints: const BoxConstraints(maxWidth: 300),
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: message.isUser ? AppColors.primarySoft : AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: Text(message.text, style: AppText.body),
-                      ),
-                    ),
+                    message.isUser
+                        ? Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: AppColors.primarySoft,
+                                borderRadius: BorderRadius.circular(AppRadius.lg),
+                              ),
+                              child: Text(message.text, style: AppText.body),
+                            ),
+                          )
+                        : _MentorReply(text: message.text),
                   if (_sending) MentorTypingBubble(mentorName: mentorName),
                 ],
               )),
@@ -170,14 +172,133 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
               onSubmitted: (_) => _send(subjectId),
             )),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              tooltip: 'إرسال',
-              onPressed: _sending ? null : () => _send(subjectId),
-              icon: const Icon(Icons.send_rounded),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _input,
+              builder: (context, value, _) => _SendButton(
+                active: !_sending && value.text.trim().isNotEmpty,
+                onPressed: () => _send(subjectId),
+              ),
             ),
           ]),
         ),
       ])),
+    );
+  }
+}
+
+/// رفيق's answer as a white card, his face beside its bottom corner, the
+/// way هاشمي's answers look in Khazna.
+class _MentorReply extends StatelessWidget {
+  const _MentorReply({required this.text});
+
+  final String text;
+
+  /// The model marks key words with **…**; show them bold, never the stars.
+  static TextSpan _bold(String text) {
+    final parts = text.split('**');
+    return TextSpan(style: AppText.body.copyWith(height: 1.7), children: [
+      for (var i = 0; i < parts.length; i++)
+        if (parts[i].isNotEmpty)
+          TextSpan(text: parts[i], style: i.isOdd && i < parts.length - 1 ? AppText.bodyBold : null),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const MentorBadge(size: 44, ring: true),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.border),
+                borderRadius: const BorderRadiusDirectional.only(
+                  topStart: Radius.circular(AppRadius.lg),
+                  topEnd: Radius.circular(AppRadius.lg),
+                  bottomEnd: Radius.circular(AppRadius.lg),
+                  bottomStart: Radius.circular(4),
+                ).resolve(Directionality.of(context)),
+                boxShadow: [BoxShadow(color: AppPalette.navy.withValues(alpha: .05), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: Text.rich(_bold(text)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// رفيق's face, name and what he's for, on a soft navy-to-teal wash.
+class _MentorHeader extends StatelessWidget {
+  const _MentorHeader({required this.mentorName});
+
+  final String mentorName;
+
+  @override
+  Widget build(BuildContext context) {
+    final canPop = Navigator.of(context).canPop();
+    return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(AppSpacing.screen, AppSpacing.md, AppSpacing.md, AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [AppColors.accentSoft, AppColors.primarySoft, AppColors.background],
+          stops: const [0, .55, 1],
+        ),
+      ),
+      child: Row(children: [
+        const MentorBadge(size: 56, ring: true),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(mentorName, style: AppText.title.copyWith(color: AppColors.brand, fontSize: 26)),
+            Text('مرشدك بمواد مسار', style: AppText.label),
+          ]),
+        ),
+        if (canPop)
+          IconButton.filledTonal(
+            tooltip: 'رجوع',
+            onPressed: () => Navigator.of(context).maybePop(),
+            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+          ),
+      ]),
+    );
+  }
+}
+
+/// Grey while there's nothing to send; lights up teal once there is.
+class _SendButton extends StatelessWidget {
+  const _SendButton({required this.active, required this.onPressed});
+
+  final bool active;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: active ? AppColors.accent : AppColors.track,
+        boxShadow: active
+            ? [BoxShadow(color: AppColors.accent.withValues(alpha: .45), blurRadius: 12, offset: const Offset(0, 4))]
+            : const [],
+      ),
+      child: IconButton(
+        tooltip: 'إرسال',
+        onPressed: active ? onPressed : null,
+        icon: Icon(Icons.send_rounded, color: active ? Colors.white : AppColors.textMuted),
+      ),
     );
   }
 }

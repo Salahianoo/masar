@@ -19,17 +19,23 @@ class UserProfile {
   final String uid;
   final String displayName;
 
-  const UserProfile({required this.uid, required this.displayName});
+  /// The 5-digit number the student sees in their profile and the admin
+  /// searches by. Given once, on the first save of the name; null until then.
+  final String? studentId;
+
+  const UserProfile({required this.uid, required this.displayName, this.studentId});
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
         uid: json['uid'] as String,
         displayName: json['displayName'] as String? ?? '',
+        studentId: json['studentId'] as String?,
       );
 
-  Map<String, dynamic> toJson() => {'uid': uid, 'displayName': displayName};
+  Map<String, dynamic> toJson() =>
+      {'uid': uid, 'displayName': displayName, 'studentId': ?studentId};
 
   UserProfile copyWith({String? displayName}) =>
-      UserProfile(uid: uid, displayName: displayName ?? this.displayName);
+      UserProfile(uid: uid, displayName: displayName ?? this.displayName, studentId: studentId);
 }
 
 class Enrollment {

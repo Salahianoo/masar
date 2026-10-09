@@ -29,7 +29,9 @@ class RafeeqClient {
   /// not configured, off, busy (the proxy answers 503 while another student
   /// is being served), or too slow.
   Future<String> chat({required String system, required List<({String role, String text})> history}) async {
-    if (!configured) throw const RafeeqUnavailable();
+    if (!configured) {
+      throw const RafeeqUnavailable('رفيق مش موصول بالكمبيوتر على هالنسخة. تأكد من إعداد الاتصال.');
+    }
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
     try {
       final request = await client.postUrl(Uri.parse('${_url.replaceAll(RegExp(r'/$'), '')}/v1/chat/completions'));
@@ -65,7 +67,8 @@ class RafeeqClient {
 }
 
 class RafeeqUnavailable implements Exception {
-  const RafeeqUnavailable();
+  const RafeeqUnavailable([this.message = 'رفيق مشغول هلق، جرّب كمان شوي']);
+  final String message;
   @override
-  String toString() => 'رفيق مشغول هلق، جرّب كمان شوي';
+  String toString() => message;
 }

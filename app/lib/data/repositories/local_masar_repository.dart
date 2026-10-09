@@ -7,6 +7,9 @@ import 'package:masar/data/datasources/local/session_store.dart';
 import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/domain/services/learning_engine.dart';
 import 'package:masar/domain/repositories/masar_repository.dart';
+import 'package:masar/domain/usecases/diagnostic_use_case.dart';
+import 'package:masar/domain/usecases/daily_plan_use_case.dart';
+import 'package:masar/domain/usecases/apply_answer_use_case.dart';
 import 'package:masar/data/datasources/local/local_data.g.dart';
 import 'package:masar/data/models/local_question.dart';
 import 'package:masar/data/datasources/remote/rafeeq_client.dart';
@@ -158,7 +161,12 @@ class LocalMasarRepository implements MasarRepository {
     _requireSignIn();
     final name = displayName.trim();
     if (name.isEmpty) throw const LocalRepositoryException('اكتب اسمك');
-    _profile = UserProfile(uid: 'local-user', displayName: name);
+    _profile = UserProfile(
+      uid: 'local-user',
+      displayName: name,
+      // Same shape as the server's number; on one device there's no one to collide with.
+      studentId: _profile?.studentId ?? '${10000 + math.Random().nextInt(90000)}',
+    );
     await _persist();
   }
 
@@ -237,31 +245,9 @@ class LocalMasarRepository implements MasarRepository {
     await _latency();
     _requireSignIn();
     _checkSubject(subjectId);
-    final usedExams = <String>{};
-    final picked = <Question>[];
-    for (final c in _conceptsOf(subjectId).take(LearningEngine.diagnosticSize)) {
-      final candidates = _questions.where((q) => q.question.primaryConceptId == c.id).toList()
-        ..sort((a, b) {
-          // closest to difficulty 0, then prefer an exam not used yet
-          final d = a.difficulty.abs().compareTo(b.difficulty.abs());
-          if (d != 0) return d;
-          final aUsed = usedExams.contains(a.question.examId) ? 1 : 0;
-          final bUsed = usedExams.contains(b.question.examId) ? 1 : 0;
-          return aUsed - bUsed;
-        });
-      if (candidates.isEmpty) continue;
-      // among near-ties (within 0.15), prefer a different exam
-      final best = candidates.first;
-      final alt = candidates.firstWhere(
-        (q) =>
-            !usedExams.contains(q.question.examId) &&
-            (q.difficulty.abs() - best.difficulty.abs()) <= 0.15,
-        orElse: () => best,
-      );
-      usedExams.add(alt.question.examId);
-      picked.add(alt.question);
-    }
-    return picked;
+    return DiagnosticUseCase.pick(_conceptsOf(subjectId),
+      _questions.where((item) => item.question.subjectId == subjectId)
+        .map((item) => (question: item.question, difficulty: item.difficulty)));
   }
 
   @override
@@ -295,70 +281,13 @@ class LocalMasarRepository implements MasarRepository {
 
   TodayPlan _buildPlan(String subjectId) {
     final states = _stateOf(subjectId);
-    final concepts = _conceptsOf(subjectId);
-    final daysLeft = _daysLeft(subjectId);
-
-    final ranked = concepts.map((c) {
-      final s = states[c.id]!;
-      final m = LearningEngine.mastery(s.theta);
-      return (
-        concept: c,
-        state: s,
-        mastery: m,
-        priority: LearningEngine.priority(weight: c.weight, mastery: m, attempts: s.attempts),
-      );
-    }).toList()
-      ..sort((a, b) => b.priority.compareTo(a.priority));
-
-    final top = ranked.take(LearningEngine.planConcepts).toList();
-    final counts = LearningEngine.splitBudget(
-      top.map((t) => t.priority).toList(),
-      LearningEngine.dailyBudget(daysLeft),
-    );
-    final items = <PlanItem>[
-      for (var i = 0; i < top.length; i++)
-        PlanItem(
-          conceptId: top[i].concept.id,
-          conceptName: top[i].concept.name,
-          count: counts[i],
-          done: 0,
-          isReview: false,
-          status: LearningEngine.status(attempts: top[i].state.attempts, mastery: top[i].mastery),
-        ),
-    ];
-
-    // up to 2 review questions from strong concepts not seen for ≥ 2 days, stalest first
-    final now = _clock();
-    final topIds = top.map((t) => t.concept.id).toSet();
-    final review = ranked
-        .where((r) =>
-            !topIds.contains(r.concept.id) &&
-            LearningEngine.status(attempts: r.state.attempts, mastery: r.mastery) ==
-                MasteryStatus.strong &&
-            r.state.lastSeen != null &&
-            now.difference(r.state.lastSeen!).inDays >= LearningEngine.reviewAfterDays)
-        .toList()
-      ..sort((a, b) => a.state.lastSeen!.compareTo(b.state.lastSeen!));
-    final reviewPicks = review.take(LearningEngine.reviewQuestions).toList();
-    for (final r in reviewPicks) {
-      items.add(PlanItem(
-        conceptId: r.concept.id,
-        conceptName: r.concept.name,
-        // 2 questions split across the picked concepts (2 if only one qualifies)
-        count: LearningEngine.reviewQuestions ~/ reviewPicks.length,
-        done: 0,
-        isReview: true,
-        status: MasteryStatus.strong,
-      ));
-    }
-
-    final total = items.fold(0, (sum, i) => sum + i.count);
-    return TodayPlan(
+    return DailyPlanUseCase.build(
       subjectId: subjectId,
-      daysLeft: daysLeft,
-      minutes: LearningEngine.planMinutes(total),
-      items: items,
-      completed: false,
+      concepts: _conceptsOf(subjectId),
+      states: {for (final item in states.entries)
+        item.key: (theta: item.value.theta, attempts: item.value.attempts,
+          lastSeen: item.value.lastSeen)},
+      daysLeft: _daysLeft(subjectId), now: _clock(),
     );
   }
 
@@ -374,7 +303,8 @@ class LocalMasarRepository implements MasarRepository {
     final state = states[target];
     if (state == null) throw const LocalRepositoryException('هاد المفهوم مش موجود');
 
-    final candidates = _questions.where((q) => q.question.conceptIds.contains(target)).toList();
+    final candidates = _questions.where((q) =>
+      q.question.subjectId == subjectId && q.question.conceptIds.contains(target)).toList();
     final cutoff = _clock().subtract(const Duration(days: LearningEngine.skipRecentDays));
     final lastAnswered = <String, DateTime>{
       for (final a in _attempts) a.questionId: a.at,
@@ -431,27 +361,23 @@ class LocalMasarRepository implements MasarRepository {
     final correct = chosen == mq.answer;
     final now = _clock();
 
-    // question difficulty learns from the primary concept's theta before the update
-    final primary = states[q.primaryConceptId]!;
-    final newB = LearningEngine.updateDifficulty(b: mq.difficulty, theta: primary.theta, correct: correct);
-
-    for (var i = 0; i < q.conceptIds.length; i++) {
-      final s = states[q.conceptIds[i]];
-      if (s == null) continue;
-      s.theta = LearningEngine.updateTheta(
-        theta: s.theta,
-        b: mq.difficulty,
-        attempts: s.attempts,
-        correct: correct,
-        secondary: i > 0,
-      );
-      s.attempts++;
-      if (correct) s.correct++;
-      s.lastSeen = now;
-      s.recent.add(correct);
-      if (s.recent.length > 3) s.recent.removeAt(0);
+    final applied = ApplyAnswerUseCase.apply(
+      conceptIds: q.conceptIds,
+      states: {for (final id in q.conceptIds)
+        if (states[id] case final state?) id: (
+          theta: state.theta, attempts: state.attempts, correct: state.correct,
+          lastSeen: state.lastSeen, recent: state.recent)},
+      difficulty: mq.difficulty, correct: correct, now: now,
+    );
+    for (final item in applied.states.entries) {
+      final state = states[item.key]!;
+      state.theta = item.value.theta;
+      state.attempts = item.value.attempts;
+      state.correct = item.value.correct;
+      state.lastSeen = item.value.lastSeen;
+      state.recent..clear()..addAll(item.value.recent);
     }
-    mq.difficulty = newB;
+    mq.difficulty = applied.difficulty;
 
     _attempts.add(_Attempt(questionId: questionId, at: now));
 
@@ -463,9 +389,6 @@ class LocalMasarRepository implements MasarRepository {
     _history.putIfAbsent(subjectId, () => {})[_today] = after.readiness;
     _emit(subjectId);
 
-    final recent = primary.recent;
-    final confused =
-        recent.length >= 2 && !recent[recent.length - 1] && !recent[recent.length - 2];
     final concept = _conceptById[q.primaryConceptId]!;
     await _persist();
 
@@ -478,7 +401,7 @@ class LocalMasarRepository implements MasarRepository {
         for (final id in q.conceptIds)
           if (_conceptById[id] != null) _masteryOf(_conceptById[id]!, states[id]!),
       ],
-      nudge: confused
+      nudge: applied.nudge
           ? MentorNudge(
               conceptId: concept.id,
               conceptName: concept.name,

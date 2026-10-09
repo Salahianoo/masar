@@ -1,11 +1,10 @@
-import {applicationDefault, initializeApp} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
+import {commit, write} from "./firestore-rest.js";
 
 const projectId = "masar-hackathon-jo-2026-salah";
 const config = {
   mentorName: "رفيق",
-  mentorEnabled: true,
-  mentorSource: "cloud",
+  mentorEnabled: false,
+  mentorSource: "pc",
   dailyMentorLimit: 30,
 } as const;
 
@@ -16,7 +15,6 @@ if (process.argv[2] !== "--write") {
   if (process.env.GOOGLE_CLOUD_PROJECT && process.env.GOOGLE_CLOUD_PROJECT !== projectId) {
     throw new Error(`Refusing to write to ${process.env.GOOGLE_CLOUD_PROJECT}; expected ${projectId}`);
   }
-  initializeApp({credential: applicationDefault(), projectId});
-  await getFirestore().doc("config/app").set(config);
+  await commit([write("config/app", config)]);
   console.log(`Seeded config/app in ${projectId}.`);
 }

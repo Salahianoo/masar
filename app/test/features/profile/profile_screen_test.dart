@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:masar/core/di/repository_provider.dart';
 import 'package:masar/data/repositories/local_masar_repository.dart';
 import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/presentation/screens/profile/profile_screen.dart';
@@ -44,7 +45,10 @@ Future<void> pumpProfile(WidgetTester tester) async {
     ],
   );
   await tester.pumpWidget(ProviderScope(
-    overrides: [masarRepositoryProvider.overrideWithValue(repo)],
+    overrides: [
+      masarRepositoryProvider.overrideWithValue(repo),
+      googleAccountServiceProvider.overrideWithValue(null),
+    ],
     child: _App(router),
   ));
   await tester.pumpAndSettle();
@@ -86,6 +90,9 @@ void main() {
     await pumpProfile(tester);
 
     expect(find.text('سارة'), findsOneWidget);
+    final number = (await repo.currentProfile())!.studentId!;
+    expect(number, matches(RegExp(r'^[1-9]\d{4}$')));
+    expect(find.text(number), findsOneWidget);
     expect(find.text('إحصائياتي'), findsOneWidget);
     expect(find.text('متوسط جاهزيتك'), findsOneWidget);
     expect(find.text('7 يوم'), findsOneWidget);

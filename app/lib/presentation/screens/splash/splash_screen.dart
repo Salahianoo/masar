@@ -3,18 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:masar/presentation/state/providers.dart';
+import 'package:masar/core/di/repository_provider.dart';
 import 'package:masar/presentation/navigation/routes.dart';
 import 'package:masar/presentation/components/masar_splash_animation.dart';
 import 'package:masar/presentation/components/widgets.dart';
+import 'package:masar/presentation/state/intro_seen.dart';
 
-/// Anonymous sign-in, then: no profile or no enrollment → onboarding, else home.
+/// First launch → the three intro slides; no name yet → the name screen;
+/// otherwise home, which offers a subject when there is none. Sign-in reuses a
+/// working saved session or quietly starts a new anonymous one.
 final startRouteProvider = FutureProvider<String>((ref) async {
+  if (!await IntroSeen.read()) return AppRoutes.intro;
   final repo = ref.read(masarRepositoryProvider);
   await repo.signIn();
   final profile = await repo.currentProfile();
   if (profile == null || profile.displayName.isEmpty) return AppRoutes.onboarding;
-  final enrollments = await repo.enrollments();
-  return enrollments.isEmpty ? AppRoutes.onboarding : AppRoutes.home;
+  return AppRoutes.home;
 });
 
 /// Plays the launch animation while sign-in runs underneath, and leaves once

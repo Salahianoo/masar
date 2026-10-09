@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:masar/domain/entities/entities.dart';
@@ -28,10 +29,14 @@ class ProfileHeader extends StatelessWidget {
     required this.name,
     required this.subjectCount,
     required this.onEditName,
+    this.studentId,
   });
 
   final String name;
   final int subjectCount;
+
+  /// The 5-digit number from sign-up; hidden until the server has given one.
+  final String? studentId;
   final VoidCallback onEditName;
 
   @override
@@ -75,6 +80,10 @@ class ProfileHeader extends StatelessWidget {
                       : 'طالب مسار · ${_subjectsLabel(subjectCount)}',
                   style: AppText.label.copyWith(color: Colors.white.withValues(alpha: .8)),
                 ),
+                if (studentId != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  FittedBox(fit: BoxFit.scaleDown, child: _StudentNumber(studentId!)),
+                ],
               ],
             ),
           ),
@@ -522,6 +531,41 @@ class ProfileTile extends StatelessWidget {
         title: Text(title, style: AppText.body.copyWith(color: color)),
         subtitle: subtitle == null ? null : Text(subtitle!, style: AppText.caption),
         trailing: onTap == null ? null : Icon(Icons.chevron_right, color: AppColors.textMuted),
+      ),
+    );
+  }
+}
+
+/// «رقمي 12345» in a chip; a long press copies the number.
+class _StudentNumber extends StatelessWidget {
+  const _StudentNumber(this.id);
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () {
+        Clipboard.setData(ClipboardData(text: id));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('نسخنا رقمك')));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: Colors.white.withValues(alpha: .25)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text('رقمي ', style: AppText.caption.copyWith(color: Colors.white.withValues(alpha: .8))),
+          Text(id,
+              textDirection: TextDirection.ltr,
+              style: AppText.bodyBold.copyWith(
+                color: Colors.white,
+                letterSpacing: 2,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              )),
+        ]),
       ),
     );
   }
