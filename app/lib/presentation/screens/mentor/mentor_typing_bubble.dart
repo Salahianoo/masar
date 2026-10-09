@@ -33,14 +33,14 @@ class _MentorTypingBubbleState extends State<MentorTypingBubble>
       liveRegion: true,
       label: '$name عم يحضّرلك الجواب',
       child: Align(
-        alignment: AlignmentDirectional.centerEnd,
+        alignment: AlignmentDirectional.centerStart,
         child: Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const MentorBadge(size: 40),
+              const MentorBadge(size: 44, ring: true),
               const SizedBox(width: AppSpacing.sm),
               Flexible(
                 child: Container(
