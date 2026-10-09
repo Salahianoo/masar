@@ -3,8 +3,8 @@ import {commit, write} from "./firestore-rest.js";
 const projectId = "masar-hackathon-jo-2026-salah";
 const config = {
   mentorName: "رفيق",
-  mentorEnabled: true,
-  mentorSource: "cloud",
+  mentorEnabled: false,
+  mentorSource: "pc",
   dailyMentorLimit: 30,
 } as const;
 

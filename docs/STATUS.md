@@ -83,7 +83,7 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 ## Gaps, in priority order
 1. **Admin dashboard**: Implemented and hosted. Verify the six pages using Salah's admin account and an active student. Demo users are labelled «بيانات تجريبية» and can be hidden; historical `statsDaily` aggregates still include them.
 2. **Firebase path**: Blaze, Firestore, import, rules and seven learning functions are live. Remaining:
-   - Set Masar's three mentor secrets (`ANTHROPIC_API_KEY`, `MASAR_LLM_URL`, `MASAR_LLM_TOKEN`), then deploy `askMentor`. Do not reuse Khazna or هاشمي tokens.
+   - رفيق currently runs only through the local PC demo. Firebase `config/app` is `mentorSource=pc`, `mentorEnabled=false` until Masar's separate tunnel and token (`MASAR_LLM_URL`, `MASAR_LLM_TOKEN`) exist. Cloud fallback additionally needs `ANTHROPIC_API_KEY`. Then deploy `askMentor` and enable it. Do not reuse Khazna or هاشمي tokens.
    - Enable Firebase Storage and upload the five Masar PDFs; Firestore `exams.pdfUrl` is currently null.
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
 3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
