@@ -143,11 +143,12 @@ export const startDiagnostic = onCall(async (request) => {
     db.collection(`subjects/${subjectId}/concepts`).get(),
     db.collection("questions").where("subjectId", "==", subjectId).get(),
   ]);
-  const chosen = pickDiagnostic(conceptList(concepts.docs), questions.docs.map(candidate));
+  const available = questions.docs.filter((doc) => doc.get("flagged") !== true);
+  const chosen = pickDiagnostic(conceptList(concepts.docs), available.map(candidate));
   if (!chosen.length || chosen.length !== Math.min(8, concepts.size)) {
     fail("failed-precondition", "ما في أسئلة كافية للتشخيص حالياً.");
   }
-  const byId = new Map(questions.docs.map((doc) => [doc.id, doc]));
+  const byId = new Map(available.map((doc) => [doc.id, doc]));
   return {questions: chosen.map((question) => clientQuestion(question.id, byId.get(question.id)!.data()))};
 });
 
@@ -234,7 +235,8 @@ export const nextQuestion = onCall(async (request) => {
   ]);
   const recent = new Set(attempts.docs.map((doc) => String(doc.get("questionId"))));
   const theta = readStates(masteryDoc.data())[conceptId]?.theta ?? -1;
-  const chosen = pickNextQuestion(questions.docs.filter((doc) => doc.get("subjectId") === subjectId).map(candidate), theta, recent);
+  const available = questions.docs.filter((doc) => doc.get("subjectId") === subjectId && doc.get("flagged") !== true);
+  const chosen = pickNextQuestion(available.map(candidate), theta, recent);
   const doc = questions.docs.find((item) => item.id === chosen?.id);
   return {question: doc ? clientQuestion(doc.id, doc.data()) : null};
 });

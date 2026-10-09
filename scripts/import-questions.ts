@@ -2,8 +2,8 @@ import {createHash} from "node:crypto";
 import {readdir, readFile} from "node:fs/promises";
 import {basename, join} from "node:path";
 import {fileURLToPath} from "node:url";
-import {initializeApp, applicationDefault} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
+import {accessToken} from "./cli-token.js";
+import {commit, getDocument, write as putDoc} from "./firestore-rest.js";
 
 type SourceOption = {label?: unknown; text?: unknown};
 type SourceQuestion = {
@@ -23,6 +23,13 @@ type ImportQuestion = {
   optionCounts: Record<string, number>; flagged: boolean;
 };
 type ImportExam = {id: string; subjectId: string; label: string; pdfUrl: null; questionCount: number; order: number};
+type ConceptSource = {id: string; name: string; questions: string[]; explanation: string};
+type ConceptFile = {
+  subjects: Record<string, {name: string; file: string; concepts: ConceptSource[]; mentorNotes?: string}>;
+  suspect: Record<string, Record<string, string>>;
+};
+type ImportConcept = {id: string; name: string; weight: number; explanation: string; order: number;
+  learners: number; masterySum: number};
 
 const pilotSubjects: Record<string, string> = {
   "ثقافة صحية و اسعافات أولية": "first-aid",
@@ -68,9 +75,8 @@ function answerLabel(q: SourceQuestion, options: {label: string; text: string}[]
   const original = Array.isArray(q.options) ? q.options : [];
   const matchingOriginal = original.find((option) => String(option.label).trim() === answer);
   if (q.kind === "truefalse") {
-    return original.length
-      ? matchingOriginal && truth(String(matchingOriginal.text ?? ""))
-      : truth(answer);
+    return truth(answer) ?? (matchingOriginal ? truth(String(matchingOriginal.text ?? "")) : undefined) ??
+      (/^\d+$/.test(answer) ? truth(String(original[Number(answer) - 1]?.text ?? "")) : undefined);
   }
   return matchingOriginal ? options.find((option) => option.label === answer)?.label : undefined;
 }
@@ -93,16 +99,28 @@ function hash(value: string): string {
 }
 
 async function collect(sourceDir: string, subjects: Set<string>) {
+  const conceptFile = JSON.parse(await readFile(join(sourceDir, "concepts.json"), "utf8")) as ConceptFile;
   const files = (await readdir(sourceDir)).filter((file) => file.endsWith(".json") &&
     pilotFiles.has(file) && !file.startsWith("bench-") && file !== "test.json" &&
     !file.includes("DRAFT")).sort();
-  const bySubject = new Map<string, {name: string; exams: ImportExam[]; questions: ImportQuestion[]; skipped: number}>();
+  const bySubject = new Map<string, {name: string; exams: ImportExam[]; questions: ImportQuestion[];
+    concepts: ImportConcept[]; mentorNotes: string; skipped: number}>();
   for (const file of files) {
     const source = JSON.parse(await readFile(join(sourceDir, file), "utf8")) as SourceFile;
     const name = String(source.subjectName ?? "");
     const subjectId = pilotSubjects[name];
     if (!subjectId || !subjects.has(subjectId)) continue;
-    const group = bySubject.get(subjectId) ?? {name, exams: [], questions: [], skipped: 0};
+    const sourceConcepts = conceptFile.subjects[subjectId];
+    if (!sourceConcepts || sourceConcepts.name !== name || sourceConcepts.file !== basename(file, ".json")) {
+      throw new Error(`${file}: concepts.json does not match this paper`);
+    }
+    const conceptOf = new Map<string, string[]>();
+    for (const concept of sourceConcepts.concepts) for (const key of concept.questions) {
+      conceptOf.set(key, [...(conceptOf.get(key) ?? []), concept.id]);
+    }
+    const suspect = conceptFile.suspect[sourceConcepts.file] ?? {};
+    const group = bySubject.get(subjectId) ?? {name, exams: [], questions: [], concepts: [],
+      mentorNotes: sourceConcepts.mentorNotes ?? "", skipped: 0};
     bySubject.set(subjectId, group);
     const sections = Array.isArray(source.sections) ? source.sections : [];
     for (const [sectionIndex, section] of sections.entries()) {
@@ -122,15 +140,26 @@ async function collect(sourceDir: string, subjects: Set<string>) {
           continue;
         }
         const id = `${examId}-${position + 1}-${hash(text)}`;
+        const key = `${sectionIndex}.${position}`;
+        const conceptIds = conceptOf.get(key);
+        if (!conceptIds?.length || conceptIds.length > 2) throw new Error(`${file} ${key}: missing or excessive concepts`);
         questions.push({id, answer, subjectId, examId, examLabel: label, kind: q.kind,
-          text, options, conceptIds: [], difficulty: 0, attempts: 0, correctCount: 0,
-          optionCounts: {}, flagged: false});
+          text, options, conceptIds, difficulty: 0, attempts: 0, correctCount: 0,
+          optionCounts: {}, flagged: Boolean(suspect[key])});
       }
       if (!questions.length) continue;
       group.exams.push({id: examId, subjectId, label, pdfUrl: null,
         questionCount: questions.length, order: group.exams.length});
       group.questions.push(...questions);
     }
+    if (group.questions.length !== conceptOf.size) {
+      throw new Error(`${file}: ${conceptOf.size} tagged questions but ${group.questions.length} usable questions`);
+    }
+    group.concepts = sourceConcepts.concepts.map((concept, order) => ({
+      id: concept.id, name: concept.name, explanation: concept.explanation, order: order + 1,
+      weight: group.questions.filter((question) => question.conceptIds[0] === concept.id).length / group.questions.length,
+      learners: 0, masterySum: 0,
+    }));
   }
   return bySubject;
 }
@@ -139,32 +168,37 @@ async function main() {
   const {sourceDir, write, subjects} = args();
   const groups = await collect(sourceDir, subjects);
   for (const [id, group] of groups) {
-    console.log(`${id}: ${group.exams.length} exams, ${group.questions.length} questions, ${group.skipped} ambiguous skipped`);
+    console.log(`${id}: ${group.exams.length} exams, ${group.questions.length} questions, ${group.concepts.length} concepts, ${group.questions.filter((q) => q.flagged).length} flagged, ${group.skipped} ambiguous skipped`);
   }
   if (!write) return;
-  if (!process.env.GOOGLE_CLOUD_PROJECT) throw new Error("Set GOOGLE_CLOUD_PROJECT to the Masar project before --write");
-  if (process.env.GOOGLE_CLOUD_PROJECT !== "masar-hackathon-jo-2026-salah" &&
-      !process.env.FIRESTORE_EMULATOR_HOST) throw new Error("Refusing to write to a project other than Masar");
-  initializeApp({credential: applicationDefault(), projectId: process.env.GOOGLE_CLOUD_PROJECT});
-  const db = getFirestore();
+  const token = await accessToken();
   for (const [id, group] of groups) {
-    const writer = db.bulkWriter();
-    const subjectRef = db.doc(`subjects/${id}`);
-    if (!(await subjectRef.get()).exists) writer.create(subjectRef, {name: group.name,
-      questionCount: group.questions.length, conceptCount: 0, active: false});
-    else writer.update(subjectRef, {questionCount: group.questions.length});
+    const writes = [];
+    const subjectFields = {name: group.name, questionCount: group.questions.filter((q) => !q.flagged).length,
+      conceptCount: group.concepts.length, active: true, mentorNotes: group.mentorNotes};
+    writes.push(putDoc(`subjects/${id}`, subjectFields));
+    for (const concept of group.concepts) {
+      const path = `subjects/${id}/concepts/${concept.id}`;
+      const existing = await getDocument(path, token);
+      writes.push(existing ? putDoc(path, {weight: concept.weight, order: concept.order}, ["weight", "order"])
+        : putDoc(path, concept));
+    }
     for (const exam of group.exams) {
-      const examRef = db.doc(`exams/${exam.id}`);
-      if (!(await examRef.get()).exists) writer.create(examRef, exam);
+      const path = `exams/${exam.id}`;
+      if (!(await getDocument(path, token))) writes.push(putDoc(path, exam));
     }
     for (const {id: questionId, answer, ...question} of group.questions) {
-      const questionRef = db.doc(`questions/${questionId}`);
-      const existing = await questionRef.get();
-      if (existing.exists) continue; // Preserve attempts, concepts and any reviewed corrections on re-run.
-      writer.create(questionRef, question);
-      writer.create(db.doc(`answerKeys/${questionId}`), {answer});
+      const path = `questions/${questionId}`;
+      const existing = await getDocument(path, token);
+      if (existing) {
+        writes.push(putDoc(path, {conceptIds: question.conceptIds,
+          flagged: existing.fields?.flagged?.booleanValue === true || question.flagged}, ["conceptIds", "flagged"]));
+        continue; // Preserve learned difficulty, attempts and answer keys.
+      }
+      writes.push(putDoc(path, question));
+      writes.push(putDoc(`answerKeys/${questionId}`, {answer}));
     }
-    await writer.close();
+    await commit(writes, token);
     console.log(`Wrote ${id}`);
   }
 }
