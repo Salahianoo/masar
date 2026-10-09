@@ -14,7 +14,7 @@ date, answers a short diagnostic (8 questions), and gets a **concept map** with 
 per concept plus one **readiness %** for the exam. Every day the app builds a short plan
 that targets the student's weakest concepts, weighted by how often each concept appears
 in **real past exams**. After two mistakes in a row on the same concept, an AI **mentor**
-(a 3D character, name TBD, read from config) steps in with an explanation. The question
+(a 3D character named رفيق, read from config) steps in with an explanation. The question
 bank comes from Khazna (خزنة), an existing past-exams app, which lives inside Masar as one
 tab. Masar is a **separate product**: separate Firebase project, repo, branding and bot.
 Nothing here touches Khazna's app, backend or data.
@@ -25,7 +25,7 @@ Language: Arabic UI, RTL, Jordanian-friendly tone. Code, identifiers and comment
 
 | Person | Tool | Owns (only they edit these paths) |
 |---|---|---|
-| Salah | Codex | `functions/`, `admin/`, `scripts/`, `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `app/lib/core/data/firebase_masar_repository.dart`, and all visuals: `design/**`, `app/assets/**` (icon, brand, mentor images) |
+| Salah | Codex | `functions/`, `admin/`, `scripts/`, `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `app/lib/core/data/firebase_masar_repository.dart`, and all visuals: `design/**`, `app/assets/**` (icon, brand, mentor images), plus `pc/` (رفيق on the PC) and `docs/mentor-persona.md` |
 | Amer | Claude | `app/` shell: `app/lib/main.dart`, `app/lib/core/` (except the Firebase repository file), `app/lib/features/onboarding/`, `diagnostic/`, `map/`, `home/`, `profile/` |
 | Osama | Claude | `app/lib/features/practice/`, `mentor/`, `khazna/`, `summary/` |
 
@@ -57,6 +57,7 @@ masar/
   admin/                    Admin dashboard, React + Vite + TS (Salah)
   scripts/                  import / tagging scripts, Node + TS (Salah)
   design/                   brand, icon, mentor sources and pitch visuals (Salah)
+  pc/                       رفيق on the team PC: token proxy, tunnel config, start script (Salah)
   docs/CONTRACT.md          this file
   firestore.rules  firestore.indexes.json  firebase.json
 ```
@@ -67,7 +68,7 @@ All timestamps are Firestore `Timestamp`. Day keys are `yyyy-MM-dd` in Asia/Amma
 
 ```
 config/app
-  mentorName: string            // the bot's display name, e.g. "TBD"
+  mentorName: string            // the bot's display name: "رفيق"
   mentorEnabled: bool
   mentorSource: "pc" | "cloud"  // where askMentor sends requests
   dailyMentorLimit: number      // messages per student per day, default 30
@@ -281,6 +282,8 @@ last 3 days.
 
 ## 8. The mentor (askMentor)
 
+- Persona and the exact system prompt: `docs/mentor-persona.md` (copy it into
+  `functions/src/mentor-prompt.ts`; the placeholders are explained there).
 - Grounding: the concept's `explanation` + up to 6 questions of that concept **with** their
   answers (from `answerKeys`), + subject name.
 - **No `conceptId`** (the free chat tab): infer it from the student's last message, with no
@@ -292,7 +295,9 @@ last 3 days.
 - Source from `config/app.mentorSource`:
   - `pc` → OpenAI-compatible endpoint on the team PC (LM Studio, Qwen3.5-9B, 8k context,
     one request at a time). **Its own tunnel hostname and token**, secrets
-    `MASAR_LLM_URL`, `MASAR_LLM_TOKEN`. Never reuse Khazna's.
+    `MASAR_LLM_URL` (https://rafeeq.salahabushamseih.com) and `MASAR_LLM_TOKEN`. Never reuse
+    Khazna's. Setup is in `pc/README.md`. The proxy answers HTTP 503 "busy" when a request is
+    already running; treat that exactly like a timeout.
   - `cloud` → Anthropic API, secret `ANTHROPIC_API_KEY`, model from env `MENTOR_MODEL`
     (default `claude-haiku-5-5`). A hard monthly spend limit is set in the Anthropic console.
   - If `pc` times out (12 s to first token), fall back to `cloud` only when env
