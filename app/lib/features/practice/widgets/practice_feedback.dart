@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../fake_core/core.dart';
+import '../practice_core.dart';
 
 const correctLines = ['هيك!', 'برافو 💪', 'عاش!', 'صح عليك 👌', 'ممتاز، كمّل هيك'];
 const wrongLines = [

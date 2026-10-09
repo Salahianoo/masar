@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../mentor/mentor_intervention_sheet.dart';
-import 'fake_core/core.dart';
+import 'practice_core.dart';
 import 'practice_args.dart';
 import 'practice_session.dart';
 import 'widgets/option_card.dart';

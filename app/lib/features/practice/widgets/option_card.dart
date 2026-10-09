@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../fake_core/core.dart';
+import '../practice_core.dart';
 
 enum OptionState { idle, pending, correct, wrong, dimmed }
 

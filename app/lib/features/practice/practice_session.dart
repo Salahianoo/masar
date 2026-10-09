@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'fake_core/core.dart';
+import 'practice_core.dart';
 import 'practice_args.dart';
 
 /// Questions in concept mode (no plan).

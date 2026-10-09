@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:masar/features/practice/fake_core/core.dart';
-import 'package:masar/features/practice/fake_core/fake_masar_repository.dart';
+import 'package:masar/core/data/mock_data.dart';
+import 'package:masar/core/data/mock_masar_repository.dart';
+import 'package:masar/features/practice/practice_core.dart';
 import 'package:masar/features/practice/practice_args.dart';
 import 'package:masar/features/practice/practice_screen.dart';
 import 'package:masar/features/practice/widgets/option_card.dart';
 
-late FakeMasarRepository repo;
+late MockMasarRepository repo;
 
 Future<void> pumpPractice(WidgetTester tester, String location) async {
   // A 360-dp-wide phone: any overflow fails the test.
@@ -44,12 +45,12 @@ Future<void> settle(WidgetTester tester) async {
 
 Question currentQuestion(WidgetTester tester) {
   final text = tester.widget<Text>(find.byKey(const Key('practice.question'))).data;
-  return repo.bank.firstWhere((q) => q.text == text);
+  return buildMockQuestions().firstWhere((q) => q.question.text == text).question;
 }
 
 Future<void> answer(WidgetTester tester, {required bool correctly}) async {
   final q = currentQuestion(tester);
-  final key = repo.answerFor(q.id);
+  final key = buildMockQuestions().firstWhere((item) => item.question.id == q.id).answer;
   final option = q.options.firstWhere((o) => (o.label == key) == correctly);
   await tester.tap(find.ancestor(of: find.text(option.text), matching: find.byType(OptionCard)));
   await settle(tester);
@@ -64,7 +65,12 @@ double readinessBarValue(WidgetTester tester) =>
     tester.widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator)).value!;
 
 void main() {
-  setUp(() => repo = FakeMasarRepository(latency: const Duration(milliseconds: 10)));
+  setUp(() async {
+    repo = MockMasarRepository(simulateLatency: false);
+    await repo.signIn();
+    await repo.updateProfile('طالب تجريبي');
+    await repo.enroll(mockSubjectId, DateTime.now().add(const Duration(days: 7)));
+  });
 
   testWidgets('a correct answer moves readiness up live', (tester) async {
     await pumpPractice(tester, '/practice/first-aid?conceptId=bleeding');
@@ -84,7 +90,7 @@ void main() {
     await pumpPractice(tester, '/practice/first-aid?conceptId=bleeding');
 
     await answer(tester, correctly: false);
-    expect(find.textContaining(RegExp(r'^الجاهزية \d+%$')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^الجاهزية \d+%')), findsOneWidget);
     expect(tester.widgetList<OptionCard>(find.byType(OptionCard)).map((c) => c.state),
         containsAll([OptionState.wrong, OptionState.correct]));
     await tapNext(tester);

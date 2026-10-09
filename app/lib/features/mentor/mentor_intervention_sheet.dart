@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../practice/fake_core/core.dart';
+import '../practice/practice_core.dart';
 
 /// What the student chose in the intervention sheet.
 enum MentorInterventionOutcome { dismissed, tryAnother }

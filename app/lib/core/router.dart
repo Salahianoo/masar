@@ -6,6 +6,7 @@ import '../features/home/home_screen.dart';
 import '../features/map/map_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/practice/practice_screen.dart';
 import 'app_shell.dart';
 import 'routes.dart';
 import 'splash_screen.dart';
@@ -29,14 +30,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => MapScreen(subjectId: state.pathParameters['subjectId']!),
       ),
 
-      // ── Osama's screens: placeholders until he swaps them in ──
+      // Practice shares the same repository as the rest of the app.
       GoRoute(
         path: '/practice/:subjectId',
-        builder: (context, state) => PlaceholderScreen(
-          title: 'التمرين',
-          details: 'subjectId=${state.pathParameters['subjectId']} '
-              '${state.uri.queryParameters}',
-        ),
+        builder: (context, state) => PracticeScreen.fromState(state),
       ),
       GoRoute(
         path: '/summary/:subjectId',
