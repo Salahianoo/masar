@@ -1,6 +1,7 @@
 /// Every path in the app. Use these instead of typing paths by hand.
 abstract final class AppRoutes {
   static const splash = '/';
+  static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const addSubject = '/subjects/add';
 

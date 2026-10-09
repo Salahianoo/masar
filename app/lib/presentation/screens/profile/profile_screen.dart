@@ -13,11 +13,14 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Forgets this device's student (name, subjects, progress) after a confirm.
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final google = ref.read(googleAccountServiceProvider);
     final sure = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تسجيل خروج؟'),
-        content: const Text('رح ننسى اسمك وموادك وتقدّمك على هاد الجهاز.'),
+        content: Text(google?.isGoogleConnected == true
+            ? 'تقدّمك محفوظ بحساب Google. بتقدر ترجعله لما تسجّل دخول من جديد.'
+            : 'إذا طلعت قبل ربط Google، ممكن ما تقدر ترجع لتقدّمك.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('لا')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('اطلع')),
@@ -29,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     ref
       ..invalidate(profileProvider)
       ..invalidate(enrollmentsProvider);
-    if (context.mounted) context.go(AppRoutes.onboarding);
+    if (context.mounted) context.go(google == null ? AppRoutes.onboarding : AppRoutes.signIn);
   }
 
   @override
@@ -46,6 +49,8 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.md),
         Text(profile.value?.displayName ?? 'طالب مسار', style: AppText.heading,
           textAlign: TextAlign.center),
+        const SizedBox(height: AppSpacing.md),
+        const _GoogleConnectButton(),
         const SizedBox(height: AppSpacing.xl),
         Text('موادي', style: AppText.heading),
         const SizedBox(height: AppSpacing.md),
@@ -79,5 +84,56 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ],
     ));
+  }
+}
+
+class _GoogleConnectButton extends ConsumerStatefulWidget {
+  const _GoogleConnectButton();
+
+  @override
+  ConsumerState<_GoogleConnectButton> createState() => _GoogleConnectButtonState();
+}
+
+class _GoogleConnectButtonState extends ConsumerState<_GoogleConnectButton> {
+  bool _busy = false;
+
+  Future<void> _connect() async {
+    final service = ref.read(googleAccountServiceProvider);
+    if (service == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final name = await service.signInWithGoogle();
+      if (name == null || !mounted) return;
+      ref.invalidate(profileProvider);
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تقدّمك صار مربوط بحساب Google')),
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(friendlyError(error))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final service = ref.watch(googleAccountServiceProvider);
+    if (service == null) return const SizedBox.shrink();
+    if (service.isGoogleConnected) {
+      return Text('تقدّمك محفوظ بحساب Google',
+          style: AppText.caption, textAlign: TextAlign.center);
+    }
+    return OutlinedButton.icon(
+      onPressed: _busy ? null : _connect,
+      icon: _busy
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.account_circle_outlined),
+      label: const Text('احفظ تقدّمك باستخدام Google'),
+    );
   }
 }

@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:masar/presentation/state/providers.dart';
+import 'package:masar/core/di/repository_provider.dart';
 import 'package:masar/presentation/navigation/routes.dart';
 import 'package:masar/presentation/components/masar_splash_animation.dart';
 import 'package:masar/presentation/components/widgets.dart';
 
-/// Anonymous sign-in, then: no profile or no enrollment → onboarding, else home.
+/// Existing Firebase account → profile route; new students → Google sign-in.
 final startRouteProvider = FutureProvider<String>((ref) async {
+  final google = ref.read(googleAccountServiceProvider);
+  if (google != null && !google.hasSession) return AppRoutes.signIn;
   final repo = ref.read(masarRepositoryProvider);
   await repo.signIn();
   final profile = await repo.currentProfile();

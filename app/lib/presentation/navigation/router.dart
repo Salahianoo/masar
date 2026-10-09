@@ -14,6 +14,7 @@ import 'package:masar/presentation/screens/summary/summary_screen.dart';
 import 'package:masar/presentation/navigation/app_shell.dart';
 import 'package:masar/presentation/navigation/routes.dart';
 import 'package:masar/presentation/screens/splash/splash_screen.dart';
+import 'package:masar/presentation/screens/auth/sign_in_screen.dart';
 
 export 'package:masar/presentation/navigation/routes.dart';
 
@@ -22,6 +23,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.splash,
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
+      GoRoute(path: AppRoutes.signIn, builder: (context, state) => const SignInScreen()),
       GoRoute(path: AppRoutes.onboarding, builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: AppRoutes.addSubject, builder: (context, state) => const AddSubjectScreen()),
       GoRoute(

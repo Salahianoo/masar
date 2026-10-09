@@ -12,7 +12,20 @@
           "package_name": "jo.masar.masar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "400831862945-b5kjsnls4q70fje12vgor8s6omfd0n56.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "jo.masar.masar",
+            "certificate_hash": "b43600a4edd5d9ef8e429b424fbd336e9814d401"
+          }
+        },
+        {
+          "client_id": "400831862945-aled3o9adm5kjd59a93u5gole10vs07e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDlUjW5XVaSKRls5yx9fG0t4ksLmzJxt8c"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "400831862945-aled3o9adm5kjd59a93u5gole10vs07e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "400831862945-n5eint437uqkdr7fu4hvc7q0hin2sjaf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "jo.masar.masar"
+              }
+            }
+          ]
         }
       }
     }

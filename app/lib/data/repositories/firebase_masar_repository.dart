@@ -4,10 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:masar/core/utils/json_utils.dart';
 import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/domain/repositories/masar_repository.dart';
+import 'package:masar/data/repositories/firebase_google_account_service.dart';
 
 /// The production adapter for CONTRACT §6. Student writes use callables only.
 class FirebaseMasarRepository implements MasarRepository {
@@ -38,7 +40,11 @@ class FirebaseMasarRepository implements MasarRepository {
   }
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
+    await FirebaseGoogleAccountService.initializeGoogle();
+    await GoogleSignIn.instance.signOut();
+  }
 
   @override
   Future<UserProfile?> currentProfile() async {
