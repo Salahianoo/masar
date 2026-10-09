@@ -5,6 +5,7 @@ import '../../core/data/providers.dart';
 import '../../core/models/models.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
+import 'mentor_typing_bubble.dart';
 
 class MentorScreen extends ConsumerStatefulWidget {
   const MentorScreen({super.key, this.subjectId, this.conceptId});
@@ -139,10 +140,7 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                         child: Text(message.text, style: AppText.body),
                       ),
                     ),
-                  if (_sending) const Align(
-                    alignment: Alignment.centerLeft,
-                    child: CircularProgressIndicator(),
-                  ),
+                  if (_sending) MentorTypingBubble(mentorName: mentorName),
                 ],
               )),
         if (subjectId != null && enabled) Padding(

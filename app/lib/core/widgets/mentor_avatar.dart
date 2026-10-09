@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-enum MentorPose { wave, happy, thinking, sorry, pointing }
+enum MentorPose { wave, happy, thinking, sorry, pointing, idle, head }
 
 /// The mentor character. Loads `assets/mentor/{pose}.png` (Salah's exports);
 /// until those exist it shows a colored circle placeholder.
@@ -43,6 +43,7 @@ class _Placeholder extends StatelessWidget {
         MentorPose.thinking => Icons.psychology_outlined,
         MentorPose.sorry => Icons.sentiment_dissatisfied_outlined,
         MentorPose.pointing => Icons.lightbulb_outline,
+        MentorPose.idle || MentorPose.head => Icons.face_outlined,
       };
 
   @override
@@ -51,6 +52,37 @@ class _Placeholder extends StatelessWidget {
       decoration: const BoxDecoration(color: AppColors.mentorSoft, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Icon(_icon, size: size * 0.5, color: AppColors.mentor),
+    );
+  }
+}
+
+/// رفيق's face in a soft circle: the chat avatar and the tab icon. The head
+/// pose is drawn a little larger than the circle so the cap's tassel can
+/// spill over the edge, as on his other screens.
+class MentorBadge extends StatelessWidget {
+  const MentorBadge({super.key, this.size = 40, this.ring = false});
+
+  final double size;
+
+  /// A teal ring for the selected tab.
+  final bool ring;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.mentorSoft,
+        border: ring ? Border.all(color: const Color(0xFF44BFB7), width: 2) : null,
+      ),
+      child: ClipOval(
+        child: Transform.scale(
+          scale: 1.18,
+          child: MentorAvatar(pose: MentorPose.head, size: size),
+        ),
+      ),
     );
   }
 }
