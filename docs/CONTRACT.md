@@ -282,7 +282,12 @@ last 3 days.
 ## 8. The mentor (askMentor)
 
 - Grounding: the concept's `explanation` + up to 6 questions of that concept **with** their
-  answers (from `answerKeys`), + subject name. Answer only about the subject; politely refuse
+  answers (from `answerKeys`), + subject name.
+- **No `conceptId`** (the free chat tab): infer it from the student's last message, with no
+  extra LLM call. Normalize the Arabic (strip diacritics and tatweel, أ/إ/آ→ا, ة→ه, ى→ي) and score
+  each concept by word overlap with its name, explanation and question texts. Above the
+  threshold → ground on the top 1–2 concepts. Otherwise → ground on a subject overview (all
+  concept names + weights + the student's 3 weakest concepts). The request shape is unchanged. Answer only about the subject; politely refuse
   anything else. Arabic, Jordanian-friendly, short (≤ 150 words unless asked for more).
 - Source from `config/app.mentorSource`:
   - `pc` → OpenAI-compatible endpoint on the team PC (LM Studio, Qwen3.5-9B, 8k context,
