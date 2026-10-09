@@ -1,6 +1,6 @@
 # Masar: where we are (handoff)
 
-Snapshot: **2026-10-09, evening**, `main` = `salah/ui` at the commit that added this file.
+Snapshot: **2026-10-09, evening**. Updated on branch `salah/google-sign-in` after Blaze activation.
 Read this first, then `docs/CONTRACT.md`. Salah now owns the whole repo; Amer and Osama are paused.
 
 ## The product in two lines
@@ -20,7 +20,7 @@ flutter test                                                                 # 2
 node ../scripts/build-app-data.mjs   # regenerate the app's dataset after editing scripts/data/masar-5/*
 ```
 - `LOCAL=true` (the old `MOCK=true` also works) runs everything **on the device**, using the five real papers, with
-  no backend. Without it, the app uses `FirebaseMasarRepository`, but the backend is **not deployed** (see Gaps).
+  no backend. Without it, the app uses Google sign-in and `FirebaseMasarRepository`; the seven learning functions are deployed, but cloud `askMentor` still needs its secrets (see Gaps).
 - `flutter pub get/build` rewrites `app/analysis_options.yaml` every time. Revert it before committing.
 - iOS simulator: `flutter build ios --simulator --debug --dart-define=LOCAL=true` then install `build/ios/iphonesimulator/Runner.app`.
 
@@ -69,7 +69,10 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
   questions with answers + the student's state, and calls the PC. If the PC can't answer, the student sees
   «رفيق مشغول هلق». There are no canned replies.
 - Session survives restarts (SharedPreferences). Add a subject from home («＋ مادة») or profile. Sign out.
-- Backend code (Codex): callable functions, rules, emulator tests, رفيق persona/fallback. **Not deployed.**
+- Backend code (Codex): callable functions, rules, emulator tests, رفيق persona/fallback. Seven learning functions and rules deployed; `askMentor` awaits secrets.
+- Admin dashboard: Arabic RTL, live Firestore pages for overview, students, student detail, subjects, questions and settings. Hosted at `https://masar-hackathon-jo-2026-salah.web.app`. Admin access granted only to Salah's confirmed Auth UID.
+- Masar Firestore contains 5 subjects, 34 weighted concepts, 276 reviewed questions, 276 separate answer keys, 9 exams and `config/app`. Six suspect questions are flagged and excluded from diagnostic and practice. The importer works through the Firebase CLI token without ADC.
+- Google sign-in is wired on iOS and Android; the iOS simulator build and Flutter tests pass. It has not been exercised with a human Google account on-device.
 - Pitch script: https://claude.ai/artifact/6wmqu2Z2dACmuy5PPfF1M1 (source `~/Desktop/masar-pitch/pitch.html`).
 
 ## ⚠️ Temporary for the contest (remove after, see `docs/contest-temporary.md`)
@@ -78,15 +81,11 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 - After the contest: delete that file, **rotate هاشمي's token** (it's inside demo builds), and give رفيق his own door (`pc/README.md`).
 
 ## Gaps, in priority order
-1. **Admin dashboard**: `admin/` is still the Vite starter. The dashboard needs shared data, so it depends on (2).
-   The spec is in `docs/prompts/prompt-salah-codex.md` step 7. Show demo/synthetic users labelled «بيانات تجريبية» (hackathon data rule).
-2. **Firebase path**, needed before the dashboard can see students:
-   - Blaze plan unknown: the Cloud Billing API is disabled. Check console → Usage and billing. Functions need Blaze.
-   - Storage isn't enabled (it also needs Blaze), so the PDFs can't be uploaded yet.
-   - `scripts/import-questions.ts` knows the five papers but **ignores `concepts.json`**: no concepts, conceptIds or
-     weights, and `flagged: false`. Make it write concepts from concepts.json and flag the 6 suspects.
-   - No gcloud or ADC on the Mac. For REST writes, use `scripts/cli-token.ts` (it reuses the `firebase login` token).
-   - `functions/` doesn't skip `flagged` questions when serving. Add that before going live.
+1. **Admin dashboard**: Implemented and hosted. Verify the six pages using Salah's admin account and an active student. Demo users are labelled «بيانات تجريبية» and can be hidden; historical `statsDaily` aggregates still include them.
+2. **Firebase path**: Blaze, Firestore, import, rules and seven learning functions are live. Remaining:
+   - Set Masar's three mentor secrets (`ANTHROPIC_API_KEY`, `MASAR_LLM_URL`, `MASAR_LLM_TOKEN`), then deploy `askMentor`. Do not reuse Khazna or هاشمي tokens.
+   - Enable Firebase Storage and upload the five Masar PDFs; Firestore `exams.pdfUrl` is currently null.
+   - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
 3. **Diagnostic reveals right/wrong**: CONTRACT §6/onboarding says it must not. Fix in `presentation/screens/diagnostic`.
 4. **Extract use cases**: `local_masar_repository.dart` (~750 lines) mixes data access with orchestration
    (diagnostic pick, plan build, answer update). Move those into `domain/usecases/`, keeping the tests green.
