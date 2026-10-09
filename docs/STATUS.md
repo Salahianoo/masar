@@ -103,7 +103,7 @@ splash → 3 intro slides (once per device, prefs key `masar.introSeen`) → nam
      **Blocker:** the `askmentor` Cloud Run service has no `roles/run.invoker` for `allUsers` (every other callable has it), so every call is rejected with 401 before the code runs and the app says رفيق is busy. Salah must approve granting it (Console → Cloud Run → askmentor → Security → "Allow public access", or `setIamPolicy`).
    - The five reviewed PDFs are bundled in the Flutter app and Firestore `exams.pdfUrl` points to their `asset:` paths, so they work without Firebase Storage. Enable Storage later only for new papers distributed after an app release.
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
-3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
+3. **Diagnostic answer reveal**: Changed on Salah's request (2026-10-09). Each answer now shows right/wrong, the correct option and the running score («2 من 3 · 67%»); after the last one a score screen («جبت 5 من 8 صح», %), then the map.
 4. **Extract use cases**: Diagnostic selection, daily plan building, and answer updates now live in pure `domain/usecases/`; the local repository handles storage and persistence. All Flutter tests remain green.
 5. **Firebase session**: The profile sign-out confirmation and Google-login routing have a widget test. The repository signs out of Firebase Auth and Google; start-up reuses Firebase Auth's persisted user. A real Google account sign-in/restart/sign-out cycle still needs an on-device check.
 
