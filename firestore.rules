@@ -1,6 +1,73 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /config/app {
+      allow read: if signedIn();
+      allow create, update: if isAdmin();
+    }
+
+    match /subjects/{subjectId} {
+      allow read: if signedIn();
+
+      match /concepts/{conceptId} {
+        allow read: if signedIn();
+        allow update: if isAdmin() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['name', 'explanation', 'weight']) &&
+          request.resource.data.name is string &&
+          request.resource.data.explanation is string &&
+          request.resource.data.explanation.size() <= 1200 &&
+          request.resource.data.weight is number &&
+          request.resource.data.weight >= 0 &&
+          request.resource.data.weight <= 1;
+      }
+    }
+
+    match /exams/{examId} {
+      allow read: if signedIn();
+    }
+
+    match /questions/{questionId} {
+      allow read: if signedIn();
+      allow update: if isAdmin() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['flagged']) &&
+        request.resource.data.flagged is bool;
+    }
+
+    match /answerKeys/{questionId} {
+      allow read: if isAdmin();
+    }
+
+    match /statsDaily/{dayKey} {
+      allow read: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      allow read: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      match /{document=**} {
+        allow read: if isOwner(uid) || isAdmin();
+      }
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
