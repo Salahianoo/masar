@@ -49,7 +49,7 @@ class _Placeholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.mentorSoft, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: AppColors.mentorSoft, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Icon(_icon, size: size * 0.5, color: AppColors.mentor),
     );
@@ -75,7 +75,7 @@ class MentorBadge extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.mentorSoft,
-        border: ring ? Border.all(color: const Color(0xFF44BFB7), width: 2) : null,
+        border: ring ? Border.all(color: AppColors.accent, width: 2) : null,
       ),
       child: ClipOval(
         child: Transform.scale(

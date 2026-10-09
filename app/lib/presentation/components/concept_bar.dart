@@ -74,7 +74,7 @@ class ConceptBar extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.warning),
+                  Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.warning),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(warning!, style: AppText.caption.copyWith(color: AppColors.warning)),

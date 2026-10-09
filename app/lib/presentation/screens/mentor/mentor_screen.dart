@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:masar/presentation/state/providers.dart';
 import 'package:masar/domain/entities/entities.dart';
+import 'package:masar/presentation/navigation/routes.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 import 'package:masar/presentation/components/widgets.dart';
 import 'package:masar/presentation/screens/mentor/mentor_typing_bubble.dart';
+import 'package:masar/presentation/screens/mentor/rafeeq_concept_sheet.dart';
+import 'package:masar/presentation/screens/mentor/rafeeq_welcome.dart';
 
 class MentorScreen extends ConsumerStatefulWidget {
   const MentorScreen({super.key, this.subjectId, this.conceptId});
@@ -22,6 +26,9 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
   final List<ChatMessage> _messages = [];
   bool _sending = false;
   String? _selectedSubjectId;
+
+  /// The concept picked from «اشرحلي موضوع من المادة»; grounds the rest of the chat.
+  String? _topicConceptId;
 
   @override
   void initState() {
@@ -41,19 +48,21 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
     super.dispose();
   }
 
-  Future<void> _send(String subjectId) async {
-    final value = _input.text.trim();
+  /// Sends the input field, or [text] when a suggestion card sends it.
+  Future<void> _send(String subjectId, {String? text, String? conceptId}) async {
+    final value = (text ?? _input.text).trim();
     if (value.isEmpty || _sending) return;
     setState(() {
       _messages.add(ChatMessage(role: ChatMessage.userRole, text: value));
-      _input.clear();
+      if (text == null) _input.clear();
+      if (conceptId != null) _topicConceptId = conceptId;
       _sending = true;
     });
     _toBottom();
     try {
       final reply = await ref.read(masarRepositoryProvider).askMentor(
         subjectId: subjectId,
-        conceptId: widget.conceptId,
+        conceptId: _topicConceptId ?? widget.conceptId,
         messages: _messages.length <= 12
             ? List.of(_messages)
             : _messages.sublist(_messages.length - 12),
@@ -69,6 +78,12 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
     } finally {
       if (mounted) { setState(() => _sending = false); _toBottom(); }
     }
+  }
+
+  Future<void> _explainTopic(String subjectId) async {
+    final concept = await showRafeeqConceptSheet(context, subjectId: subjectId);
+    if (concept == null || !mounted) return;
+    await _send(subjectId, text: 'اشرحلي ${concept.name}', conceptId: concept.id);
   }
 
   void _toBottom() {
@@ -106,6 +121,7 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
             onChanged: (value) => setState(() {
               _selectedSubjectId = value;
               _messages.clear();
+              _topicConceptId = null;
             }),
           ),
         ),
@@ -117,15 +133,12 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                 controller: _scroll,
                 padding: const EdgeInsets.all(AppSpacing.screen),
                 children: [
-                  if (_messages.isEmpty) Column(children: [
-                    const MentorAvatar(pose: MentorPose.wave, size: 88),
-                    const SizedBox(height: AppSpacing.md),
-                    Text('أهلاً، أنا $mentorName. شو بتحب نشرح اليوم؟',
-                      style: AppText.body, textAlign: TextAlign.center),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text('بجاوب من مادة امتحانك وأسئلتها السابقة.',
-                      style: AppText.caption, textAlign: TextAlign.center),
-                  ]),
+                  if (_messages.isEmpty) RafeeqWelcome(
+                    mentorName: mentorName,
+                    onAsk: (text) => _send(subjectId, text: text),
+                    onPractice: () => context.push(AppRoutes.practice(subjectId, mode: 'plan')),
+                    onExplainTopic: () => _explainTopic(subjectId),
+                  ),
                   for (final message in _messages)
                     Align(
                       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -144,7 +157,7 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                 ],
               )),
         if (subjectId != null && enabled) Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.screen, AppSpacing.sm, AppSpacing.screen, AppSpacing.md),
           child: Row(children: [
             Expanded(child: TextField(
               controller: _input,

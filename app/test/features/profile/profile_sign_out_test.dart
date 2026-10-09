@@ -37,9 +37,16 @@ void main() {
       builder: (_, child) => Directionality(textDirection: TextDirection.rtl, child: child!))));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.text('تسجيل خروج'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.ensureVisible(find.text('تسجيل خروج'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('تسجيل خروج'));
     await tester.pumpAndSettle();
+    expect(find.text('تسجيل خروج؟'), findsOneWidget);
     expect(find.text('تقدّمك محفوظ بحساب Google. بتقدر ترجعله لما تسجّل دخول من جديد.'),
         findsOneWidget);
     await tester.tap(find.text('اطلع'));

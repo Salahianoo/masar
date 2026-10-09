@@ -69,7 +69,7 @@ class _ExamSection extends ConsumerWidget {
               leading: const Icon(Icons.description_outlined),
               title: Text(exam.label),
               subtitle: Text('${exam.questionCount} سؤال'),
-              trailing: const Icon(Icons.chevron_left),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(AppRoutes.khaznaExam(exam.id)),
             )),
         ]),
