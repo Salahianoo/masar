@@ -16,14 +16,11 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Forgets this device's student (name, subjects, progress) after a confirm.
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
-    final google = ref.read(googleAccountServiceProvider);
     final sure = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تسجيل خروج؟'),
-        content: Text(google?.isGoogleConnected == true
-            ? 'تقدّمك محفوظ بحساب Google. بتقدر ترجعله لما تسجّل دخول من جديد.'
-            : 'إذا طلعت قبل ربط Google، ممكن ما تقدر ترجع لتقدّمك.'),
+        content: const Text('رقمك وتقدّمك مربوطين بهالجهاز. إذا طلعت، بتبلّش من جديد برقم جديد.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('لا')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('اطلع')),
@@ -35,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     ref
       ..invalidate(profileProvider)
       ..invalidate(enrollmentsProvider);
-    if (context.mounted) context.go(google == null ? AppRoutes.onboarding : AppRoutes.signIn);
+    if (context.mounted) context.go(AppRoutes.onboarding);
   }
 
   Future<void> _editName(BuildContext context, WidgetRef ref, String current) async {
@@ -80,7 +77,8 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final name = ref.watch(profileProvider).value?.displayName ?? 'طالب مسار';
+    final profile = ref.watch(profileProvider).value;
+    final name = profile?.displayName ?? 'طالب مسار';
     final enrollments = ref.watch(enrollmentsProvider);
     final subjects = ref.watch(subjectsProvider).value ?? const <Subject>[];
     final config = ref.watch(configProvider).value;
@@ -102,10 +100,9 @@ class ProfileScreen extends ConsumerWidget {
           ProfileHeader(
             name: name,
             subjectCount: items.length,
+            studentId: profile?.studentId,
             onEditName: () => _editName(context, ref, name),
           ),
-          const SizedBox(height: AppSpacing.md),
-          const _GoogleConnectButton(),
 
           const ProfileSectionTitle('إحصائياتي'),
           ProfileStatGrid(stats: stats),
@@ -202,57 +199,6 @@ class _NameDialogState extends State<_NameDialog> {
           child: const Text('احفظ'),
         ),
       ],
-    );
-  }
-}
-
-class _GoogleConnectButton extends ConsumerStatefulWidget {
-  const _GoogleConnectButton();
-
-  @override
-  ConsumerState<_GoogleConnectButton> createState() => _GoogleConnectButtonState();
-}
-
-class _GoogleConnectButtonState extends ConsumerState<_GoogleConnectButton> {
-  bool _busy = false;
-
-  Future<void> _connect() async {
-    final service = ref.read(googleAccountServiceProvider);
-    if (service == null || _busy) return;
-    setState(() => _busy = true);
-    try {
-      final name = await service.signInWithGoogle();
-      if (name == null || !mounted) return;
-      ref.invalidate(profileProvider);
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تقدّمك صار مربوط بحساب Google')),
-      );
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(friendlyError(error))),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final service = ref.watch(googleAccountServiceProvider);
-    if (service == null) return const SizedBox.shrink();
-    if (service.isGoogleConnected) {
-      return Text('تقدّمك محفوظ بحساب Google',
-          style: AppText.caption, textAlign: TextAlign.center);
-    }
-    return OutlinedButton.icon(
-      onPressed: _busy ? null : _connect,
-      icon: _busy
-          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-          : const Icon(Icons.account_circle_outlined),
-      label: const Text('احفظ تقدّمك باستخدام Google'),
     );
   }
 }

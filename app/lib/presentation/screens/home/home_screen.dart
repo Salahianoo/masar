@@ -26,17 +26,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       value: enrollments,
       onRetry: () => ref.invalidate(enrollmentsProvider),
       data: (items) {
-        if (items.isEmpty) {
-          return Center(child: PrimaryButton(
-            label: 'سجّل مادتك', onPressed: () => context.go(AppRoutes.onboarding),
-          ));
-        }
+        if (items.isEmpty) return _noSubjectYet(name);
         // Default to the newest subject, so a subject just added is the one shown.
         final selected = items.where((e) => e.subjectId == _selectedSubjectId).firstOrNull ?? items.last;
         return _subjectHome(selected, items, name);
       },
     ));
   }
+
+  /// Straight after sign-up: no subject yet, one clear way forward.
+  Widget _noSubjectYet(String name) => ListView(
+    padding: const EdgeInsets.all(AppSpacing.screen),
+    children: [
+      Row(children: [
+        const MentorAvatar(pose: MentorPose.wave, size: 52),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(child: Text('أهلاً${name.isEmpty ? '' : ' يا $name'}', style: AppText.title)),
+      ]),
+      const SizedBox(height: AppSpacing.xxl),
+      const Center(child: MentorAvatar(pose: MentorPose.pointing, size: 160)),
+      const SizedBox(height: AppSpacing.lg),
+      Text('خلّينا نبلّش بمادة', style: AppText.heading, textAlign: TextAlign.center),
+      const SizedBox(height: AppSpacing.sm),
+      Text('اختار المادة اللي عندك امتحانها، وبنعرف من وين نبلّش بأسئلة تشخيص قصيرة.',
+        style: AppText.label, textAlign: TextAlign.center),
+      const SizedBox(height: AppSpacing.xl),
+      ChooseSubjectButton(onPressed: () => context.push(AppRoutes.addSubject)),
+    ],
+  );
 
   Widget _subjectHome(Enrollment selected, List<Enrollment> enrollments, String name) {
     final subjectId = selected.subjectId;
@@ -151,4 +168,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ]),
       ),
     );
+}
+
+/// The big navy call to action on an empty home. Navy in both themes: it's the
+/// brand color, and the one thing on the screen to press.
+class ChooseSubjectButton extends StatelessWidget {
+  const ChooseSubjectButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppPalette.navy,
+      elevation: 3,
+      shadowColor: AppPalette.navy.withValues(alpha: .4),
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg + 2),
+          child: Row(children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: AppPalette.teal, borderRadius: BorderRadius.circular(AppRadius.md)),
+              child: const Icon(Icons.menu_book_rounded, color: Colors.white),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('اختار المادة اللي بدك تختبرها', style: AppText.bodyBold.copyWith(color: Colors.white)),
+                const SizedBox(height: 2),
+                Text('مواد جاهزة بأسئلة امتحانات حقيقية',
+                    style: AppText.caption.copyWith(color: Colors.white.withValues(alpha: .8))),
+              ]),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 18),
+          ]),
+        ),
+      ),
+    );
+  }
 }

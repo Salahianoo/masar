@@ -13,7 +13,7 @@ initializeApp();
 const db = getFirestore();
 setGlobalOptions({region: "europe-west1", maxInstances: 10});
 
-const fail = (code: "invalid-argument" | "not-found" | "failed-precondition", message: string): never => {
+const fail = (code: "invalid-argument" | "not-found" | "failed-precondition" | "resource-exhausted", message: string): never => {
   throw new HttpsError(code, message);
 };
 const uidOf = (auth: {uid: string} | undefined): string => {
@@ -90,25 +90,46 @@ const requiredEnrollment = async (uid: string, subjectId: string) => {
   return doc;
 };
 
+/** A free 5-digit student number (10000–99999), reserved in studentIds/{n}
+ *  inside the same transaction that writes the student, so two students can
+ *  never hold the same number. */
+const STUDENT_ID_ATTEMPTS = 12;
+const randomStudentId = () => String(10000 + Math.floor(Math.random() * 90000));
+
 export const updateProfile = onCall(async (request) => {
   const uid = uidOf(request.auth);
   const displayName = string(object(request.data).displayName);
   if (!displayName || displayName.length > 80) fail("invalid-argument", "اكتب اسمك بشكل صحيح.");
   const userRef = db.doc(`users/${uid}`);
   const statsRef = db.doc(`statsDaily/${today()}`);
-  await db.runTransaction(async (tx) => {
-    const [user, statsDoc] = await Promise.all([tx.get(userRef), tx.get(statsRef)]);
+  // Pick candidates outside the transaction; the transaction re-reads them.
+  const candidates = Array.from({length: STUDENT_ID_ATTEMPTS}, randomStudentId);
+  const studentId = await db.runTransaction(async (tx) => {
+    const [user, statsDoc, ...taken] = await Promise.all([tx.get(userRef), tx.get(statsRef),
+      ...candidates.map((id) => tx.get(db.doc(`studentIds/${id}`)))]);
     const isNew = !user.exists;
-    tx.set(userRef, {displayName, createdAt: user.get("createdAt") ?? Timestamp.now(),
+    let id = user.get("studentId") as string | undefined;
+    if (!id) {
+      id = candidates.find((_, i) => !taken[i].exists);
+      if (!id) fail("resource-exhausted", "صار ضغط على التسجيل، جرّب كمان مرة.");
+      tx.create(db.doc(`studentIds/${id}`), {uid, createdAt: Timestamp.now()});
+    }
+    // The sign-in email and provider come from the verified auth token, never
+    // from the client, so the admin dashboard can tell students apart.
+    const token = request.auth?.token as {email?: string; firebase?: {sign_in_provider?: string}} | undefined;
+    tx.set(userRef, {displayName, studentId: id, createdAt: user.get("createdAt") ?? Timestamp.now(),
       lastActiveAt: user.get("lastActiveAt") ?? Timestamp.now(),
-      lastActiveDay: user.get("lastActiveDay") ?? ""}, {merge: true});
+      lastActiveDay: user.get("lastActiveDay") ?? "",
+      email: token?.email ?? null,
+      signInProvider: token?.firebase?.sign_in_provider ?? null}, {merge: true});
     if (isNew) {
       const stats = baseStats(statsDoc.data());
       stats.newUsers++;
       tx.set(statsRef, stats);
     }
+    return id;
   });
-  return {ok: true};
+  return {ok: true, studentId};
 });
 
 export const enroll = onCall(async (request) => {

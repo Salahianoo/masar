@@ -161,7 +161,12 @@ class LocalMasarRepository implements MasarRepository {
     _requireSignIn();
     final name = displayName.trim();
     if (name.isEmpty) throw const LocalRepositoryException('اكتب اسمك');
-    _profile = UserProfile(uid: 'local-user', displayName: name);
+    _profile = UserProfile(
+      uid: 'local-user',
+      displayName: name,
+      // Same shape as the server's number; on one device there's no one to collide with.
+      studentId: _profile?.studentId ?? '${10000 + math.Random().nextInt(90000)}',
+    );
     await _persist();
   }
 

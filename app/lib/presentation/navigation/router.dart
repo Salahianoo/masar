@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:masar/presentation/screens/diagnostic/diagnostic_screen.dart';
 import 'package:masar/presentation/screens/home/home_screen.dart';
+import 'package:masar/presentation/screens/intro/intro_screen.dart';
 import 'package:masar/presentation/screens/map/map_screen.dart';
 import 'package:masar/presentation/screens/mentor/mentor_screen.dart';
 import 'package:masar/presentation/screens/khazna/khazna_screen.dart';
@@ -14,47 +16,90 @@ import 'package:masar/presentation/screens/summary/summary_screen.dart';
 import 'package:masar/presentation/navigation/app_shell.dart';
 import 'package:masar/presentation/navigation/routes.dart';
 import 'package:masar/presentation/screens/splash/splash_screen.dart';
-import 'package:masar/presentation/screens/auth/sign_in_screen.dart';
 
 export 'package:masar/presentation/navigation/routes.dart';
+
+/// Every screen slides a little and fades in; the one it covers fades back.
+/// Reduced motion (an OS setting) turns it into a plain cut.
+CustomTransitionPage<void> _animated(GoRouterState state, Widget child) => CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 380),
+      reverseTransitionDuration: const Duration(milliseconds: 280),
+      transitionsBuilder: (context, animation, secondary, child) {
+        if (MediaQuery.disableAnimationsOf(context)) return child;
+        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic);
+        // RTL: a new page comes in from the left, the reading direction's "forward".
+        final dx = Directionality.of(context) == TextDirection.rtl ? -0.12 : 0.12;
+        return FadeTransition(
+          opacity: Tween<double>(begin: 1, end: .6).animate(secondary),
+          child: FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween(begin: Offset(dx, 0), end: Offset.zero).animate(curved),
+              child: child,
+            ),
+          ),
+        );
+      },
+    );
+
+/// A soft cross-fade, for screens that aren't a step forward.
+CustomTransitionPage<void> _fade(GoRouterState state, Widget child) => CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 220),
+      transitionsBuilder: (context, animation, secondary, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
-      GoRoute(path: AppRoutes.signIn, builder: (context, state) => const SignInScreen()),
-      GoRoute(path: AppRoutes.onboarding, builder: (context, state) => const OnboardingScreen()),
-      GoRoute(path: AppRoutes.addSubject, builder: (context, state) => const AddSubjectScreen()),
+      GoRoute(path: AppRoutes.intro, pageBuilder: (context, state) => _fade(state, const IntroScreen())),
+      GoRoute(path: AppRoutes.onboarding,
+          pageBuilder: (context, state) => _animated(state, const OnboardingScreen())),
+      GoRoute(path: AppRoutes.addSubject,
+          pageBuilder: (context, state) => _animated(state, const AddSubjectScreen())),
       GoRoute(
         path: '/diagnostic/:subjectId',
-        builder: (context, state) =>
-            DiagnosticScreen(subjectId: state.pathParameters['subjectId']!),
+        pageBuilder: (context, state) =>
+            _animated(state, DiagnosticScreen(subjectId: state.pathParameters['subjectId']!)),
       ),
       GoRoute(
         path: '/map/:subjectId',
-        builder: (context, state) => MapScreen(subjectId: state.pathParameters['subjectId']!),
+        pageBuilder: (context, state) =>
+            _animated(state, MapScreen(subjectId: state.pathParameters['subjectId']!)),
       ),
 
       // Practice shares the same repository as the rest of the app.
       GoRoute(
         path: '/practice/:subjectId',
-        builder: (context, state) => PracticeScreen.fromState(state),
+        pageBuilder: (context, state) => _animated(state, PracticeScreen.fromState(state)),
       ),
-      GoRoute(path: '/summary/:subjectId', builder: (context, state) =>
-        SummaryScreen(subjectId: state.pathParameters['subjectId']!)),
+      GoRoute(path: '/summary/:subjectId', pageBuilder: (context, state) =>
+        _animated(state, SummaryScreen(subjectId: state.pathParameters['subjectId']!))),
       GoRoute(
         path: '/khazna/exam/:examId',
-        builder: (context, state) => KhaznaExamScreen(examId: state.pathParameters['examId']!),
+        pageBuilder: (context, state) =>
+            _animated(state, KhaznaExamScreen(examId: state.pathParameters['examId']!)),
       ),
-      GoRoute(path: '/mentor/:subjectId', builder: (context, state) => MentorScreen(
+      GoRoute(path: '/mentor/:subjectId', pageBuilder: (context, state) => _animated(state, MentorScreen(
         subjectId: state.pathParameters['subjectId']!,
         conceptId: state.uri.queryParameters['conceptId'],
-      )),
+      ))),
 
       // ── the 4 tabs ──
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        pageBuilder: (context, state, navigationShell) => CustomTransitionPage<void>(
+          child: AppShell(navigationShell: navigationShell),
+          transitionDuration: const Duration(milliseconds: 380),
+          transitionsBuilder: (context, animation, secondary, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(path: AppRoutes.home, builder: (context, state) => const HomeScreen()),

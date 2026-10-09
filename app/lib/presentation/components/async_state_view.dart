@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +11,13 @@ import 'package:masar/presentation/components/primary_button.dart';
 /// Arabic, student-safe text for any error. Never shows a raw exception.
 String friendlyError(Object error) {
   if (error is FirebaseFunctionsException) {
-    if (error.code == 'resource-exhausted') return 'خلصت أسئلتك لليوم، بنكمل بكرة';
+    // The server writes its own Arabic message for each limit; prefer it.
     final m = error.message;
     if (m != null && m.isNotEmpty && RegExp(r'[؀-ۿ]').hasMatch(m)) return m;
+    if (error.code == 'resource-exhausted') return 'خلصت أسئلتك لليوم، بنكمل بكرة';
   }
   if (error is AppException) return error.message;
+  if (error is TimeoutException) return 'النت بطيء أو مقطوع. تأكد من الاتصال وجرّب كمان مرة';
   return 'صار في مشكلة صغيرة. جرّب كمان مرة';
 }
 

@@ -90,6 +90,9 @@ void main() {
     await pumpProfile(tester);
 
     expect(find.text('سارة'), findsOneWidget);
+    final number = (await repo.currentProfile())!.studentId!;
+    expect(number, matches(RegExp(r'^[1-9]\d{4}$')));
+    expect(find.text(number), findsOneWidget);
     expect(find.text('إحصائياتي'), findsOneWidget);
     expect(find.text('متوسط جاهزيتك'), findsOneWidget);
     expect(find.text('7 يوم'), findsOneWidget);

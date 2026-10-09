@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,23 +35,54 @@ class FirebaseMasarRepository implements MasarRepository {
   Future<Map<String, dynamic>> _call(String name, Map<String, dynamic> data) async =>
       asJsonMap((await _functions.httpsCallable(name).call<Map<String, dynamic>>(data)).data);
 
+  /// Long enough for a slow campus network, short enough that a dead session
+  /// never leaves the student staring at the splash.
+  static const _authTimeout = Duration(seconds: 10);
+  static const _readTimeout = Duration(seconds: 12);
+
+  /// Reuses the saved student when their session still works. A saved user
+  /// whose token can no longer refresh (a deleted account, a reinstall that kept
+  /// the keychain) used to hang every Firestore read silently; now it's
+  /// dropped and a fresh anonymous student takes its place.
   @override
   Future<void> signIn() async {
-    if (_auth.currentUser == null) await _auth.signInAnonymously();
+    final user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await user.getIdToken(true).timeout(_authTimeout);
+        return;
+      } on TimeoutException {
+        rethrow; // offline: keep the student, let the splash offer a retry
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'network-request-failed') rethrow;
+      } catch (_) {
+        // any other refresh failure means this session is dead
+      }
+      await _auth.signOut();
+    }
+    await _auth.signInAnonymously().timeout(_authTimeout);
   }
 
   @override
   Future<void> signOut() async {
     await _auth.signOut();
-    await FirebaseGoogleAccountService.initializeGoogle();
-    await GoogleSignIn.instance.signOut();
+    try {
+      await FirebaseGoogleAccountService.initializeGoogle();
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {
+      // Name-only students never linked Google; nothing to sign out of.
+    }
   }
 
   @override
   Future<UserProfile?> currentProfile() async {
-    final doc = await _db.doc('users/$_uid').get();
+    final doc = await _db.doc('users/$_uid').get().timeout(_readTimeout);
     if (!doc.exists) return null;
-    return UserProfile(uid: _uid, displayName: doc.data()?['displayName'] as String? ?? '');
+    return UserProfile(
+      uid: _uid,
+      displayName: doc.data()?['displayName'] as String? ?? '',
+      studentId: doc.data()?['studentId'] as String?,
+    );
   }
 
   @override
@@ -90,7 +122,7 @@ class FirebaseMasarRepository implements MasarRepository {
 
   @override
   Future<List<Enrollment>> enrollments() async {
-    final docs = await _db.collection('users/$_uid/enrollments').get();
+    final docs = await _db.collection('users/$_uid/enrollments').get().timeout(_readTimeout);
     return docs.docs.map((d) => _enrollment(d.id, d.data())).toList();
   }
 
