@@ -140,19 +140,21 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                     onExplainTopic: () => _explainTopic(subjectId),
                   ),
                   for (final message in _messages)
-                    Align(
-                      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                        constraints: const BoxConstraints(maxWidth: 300),
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: message.isUser ? AppColors.primarySoft : AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: Text(message.text, style: AppText.body),
-                      ),
-                    ),
+                    message.isUser
+                        ? Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: AppColors.primarySoft,
+                                borderRadius: BorderRadius.circular(AppRadius.lg),
+                              ),
+                              child: Text(message.text, style: AppText.body),
+                            ),
+                          )
+                        : _MentorReply(text: message.text),
                   if (_sending) MentorTypingBubble(mentorName: mentorName),
                 ],
               )),
@@ -178,6 +180,56 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
           ]),
         ),
       ])),
+    );
+  }
+}
+
+/// رفيق's answer, with his face sitting on the bubble's top-left corner so it's
+/// clear at a glance who's talking.
+class _MentorReply extends StatelessWidget {
+  const _MentorReply({required this.text});
+
+  final String text;
+
+  static const _badge = 34.0;
+
+  /// The model marks key words with **…**; show them bold, never the stars.
+  static TextSpan _bold(String text) {
+    final parts = text.split('**');
+    return TextSpan(style: AppText.body, children: [
+      for (var i = 0; i < parts.length; i++)
+        if (parts[i].isNotEmpty)
+          TextSpan(text: parts[i], style: i.isOdd && i < parts.length - 1 ? AppText.bodyBold : null),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(top: _badge / 2, bottom: AppSpacing.md),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              constraints: const BoxConstraints(maxWidth: 300),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md, AppSpacing.md + _badge / 2, AppSpacing.md, AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Text.rich(_bold(text)),
+            ),
+            const Positioned(
+              top: -_badge / 2,
+              left: AppSpacing.md,
+              child: MentorBadge(size: _badge, ring: true),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
