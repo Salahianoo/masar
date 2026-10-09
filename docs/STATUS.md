@@ -14,13 +14,15 @@ Khazna's own app, repo and Firebase project (`hu-pp-q`) are never touched.
 ## How to run
 ```bash
 cd app
-flutter run --dart-define=LOCAL=true                                         # real data, رفيق says «مشغول»
-flutter run --dart-define=LOCAL=true --dart-define-from-file=rafeeq.local.json   # + رفيق live (Salah's Mac only)
+flutter run --dart-define=LOCAL=true                                         # real data; رفيق says he is not connected
+flutter run --dart-define=LOCAL=true --dart-define-from-file=rafeeq.local.json   # + رفيق live after configuring Masar's separate PC gateway
 flutter test                                                                 # 28 tests, all pass
 node ../scripts/build-app-data.mjs   # regenerate the app's dataset after editing scripts/data/masar-5/*
 ```
 - `LOCAL=true` (the old `MOCK=true` also works) runs everything **on the device**, using the five real papers, with
   no backend. Without it, the app uses Google sign-in and `FirebaseMasarRepository`; the seven learning functions are deployed, but cloud `askMentor` still needs its secrets (see Gaps).
+- For the PC mentor, copy `app/rafeeq.local.example.json` to the ignored `app/rafeeq.local.json` and fill in
+  only Masar's own `RAFEEQ_GATE_TOKEN` from the separate PC gateway (`pc/README.md`). Do not use هاشمي's token.
 - `flutter pub get/build` rewrites `app/analysis_options.yaml` every time. Revert it before committing.
 - iOS simulator: `flutter build ios --simulator --debug --dart-define=LOCAL=true` then install `build/ios/iphonesimulator/Runner.app`.
 
@@ -76,9 +78,9 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 - Pitch script: https://claude.ai/artifact/6wmqu2Z2dACmuy5PPfF1M1 (source `~/Desktop/masar-pitch/pitch.html`).
 
 ## ⚠️ Temporary for the contest (remove after, see `docs/contest-temporary.md`)
-- رفيق goes through **هاشمي's PC gate** (`llm.salahabushamseih.com`, هاشمي's token) because Salah is away
-  from the PC. URL and token live only in the git-ignored `app/rafeeq.local.json` on Salah's Mac.
-- After the contest: delete that file, **rotate هاشمي's token** (it's inside demo builds), and give رفيق his own door (`pc/README.md`).
+- An older local demo used هاشمي's PC gate. Do not copy its token into new builds. Configure
+  Masar's separate رفيق gateway and token in the git-ignored `app/rafeeq.local.json` (`pc/README.md`).
+- After the contest: rotate any token embedded in demo builds and move the client call behind `askMentor`.
 
 ## Gaps, in priority order
 1. **Admin dashboard**: Implemented and hosted. Verify the six pages using Salah's admin account and an active student. Demo users are labelled «بيانات تجريبية» and can be hidden; historical `statsDaily` aggregates still include them.

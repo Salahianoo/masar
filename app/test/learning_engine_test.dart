@@ -191,12 +191,12 @@ void main() {
       expect(rafeeq.lastSystem, contains('مفاهيم المادة:'));
     });
 
-    test('askMentor says رفيق is busy when the PC is not reachable', () async {
+    test('askMentor explains when the PC connection is not configured', () async {
       final offline = LocalMasarRepository(rafeeq: RafeeqClient(url: '', token: ''));
       await offline.signIn();
       expect(
         () => offline.askMentor(subjectId: subject, messages: const [ChatMessage(role: 'user', text: 'مرحبا')]),
-        throwsA(isA<LocalRepositoryException>().having((e) => e.message, 'message', contains('رفيق مشغول'))),
+        throwsA(isA<LocalRepositoryException>().having((e) => e.message, 'message', contains('مش موصول بالكمبيوتر'))),
       );
     });
 
