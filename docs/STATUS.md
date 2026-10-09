@@ -1,7 +1,7 @@
 # Masar: where we are (handoff)
 
 Snapshot: **2026-10-09, 20:10**. Updated on branch `salah/app-flow` (built on Codex's local 3038baf + Amer's UI).
-Read this first, then `docs/CONTRACT.md`. Salah now owns the whole repo; Amer and Osama are paused.
+Read this first, then **`docs/HANDOFF-2026-10-09-claude.md`** (what changed tonight and the traps), then `docs/CONTRACT.md`. Salah now owns the whole repo; Amer and Osama are paused.
 
 ## The product in two lines
 An adaptive learning app for Jordanian university students (hackathon JORDAN.NEXT(), track
