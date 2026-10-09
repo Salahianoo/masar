@@ -1,0 +1,799 @@
+{
+  "subjectName": "اخلاقيات حاسوب",
+  "examTypeLabel": "امتحان نصفي",
+  "language": "ar",
+  "sections": [
+    {
+      "questions": [
+        {
+          "number": "1",
+          "sourceNumber": "1",
+          "text": "الجريمة جماعي – جماعي هي جريمة الكترونية حسب التنفيذ",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.9
+        },
+        {
+          "number": "2",
+          "sourceNumber": "2",
+          "text": "تتكون ال TCP Segment من العديد من القيم التي تساعد على التحكم في ارسال البيانات , الجزء الذي يحدد المنفذ الذي يخرج منه الباكت من جهاز المرسل عبر الشبكة هو",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Destination Port Number"
+            },
+            {
+              "label": "b",
+              "text": "Sequence Number"
+            },
+            {
+              "label": "c",
+              "text": "Source Port Number"
+            },
+            {
+              "label": "d",
+              "text": "Acknowledge Number"
+            }
+          ],
+          "answer": "c",
+          "confidence": 0.9
+        },
+        {
+          "number": "3",
+          "sourceNumber": "3",
+          "text": "الخصوصية من اهم قضايا اخلاقيات الحاسوب ويقصد بها",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "مصادقة البيانات وحمايتها"
+            },
+            {
+              "label": "b",
+              "text": "تحديد ملكية البيانات والبرمجيات"
+            },
+            {
+              "label": "c",
+              "text": "التحكم في الوصول الى البيانات و سريتها"
+            },
+            {
+              "label": "d",
+              "text": "مسؤولية حماية البيانات من الأفراد"
+            }
+          ],
+          "answer": "d",
+          "confidence": 0.95
+        },
+        {
+          "number": "4",
+          "sourceNumber": "4",
+          "text": "من وظائف بروتوكول UDP ارسال البيانات والتأكد من وصولها",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.95
+        },
+        {
+          "number": "5",
+          "sourceNumber": "5",
+          "text": "يتكون نظام TCP/IP من أربعة طبقات تمر من خلالها البيانات , وفي كل طبقة تعمل مجموعة من البروتوكولات التي تخدم عمل كل طبقة. بروتوكول (ATM) يعمل بطبقة :",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Transport Layer"
+            },
+            {
+              "label": "b",
+              "text": "Internet Layer"
+            },
+            {
+              "label": "c",
+              "text": "Application Layer"
+            },
+            {
+              "label": "d",
+              "text": "Network Access Layer"
+            }
+          ],
+          "answer": "d",
+          "confidence": 0.93
+        },
+        {
+          "number": "6",
+          "sourceNumber": "6",
+          "text": "تعتبر التسلية والمتعة من اهداف الجريمة الالكترونية",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.95
+        },
+        {
+          "number": "7",
+          "sourceNumber": "7",
+          "dir": "ltr",
+          "text": "Hedonism maintains that ethical statements are neither true nor false and cannot be proven ; they are only statements about how someone feels :",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.95
+        },
+        {
+          "number": "8",
+          "sourceNumber": "8",
+          "text": "الطبقة المسؤولة عن النقل المنطقي لحزم البيانات وإعطاء(IP) للمضيفين هي",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Applicayion Layer"
+            },
+            {
+              "label": "b",
+              "text": "Internet Layer"
+            },
+            {
+              "label": "c",
+              "text": "Transport Layer"
+            },
+            {
+              "label": "d",
+              "text": "Presentation layer"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "9",
+          "sourceNumber": "9",
+          "dir": "ltr",
+          "text": "Which theory describes how each individual member actually was behaving in order to achieve his or her happiness and hence the happiness of the group as a whole",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Psychological Egoism"
+            },
+            {
+              "label": "b",
+              "text": "Act Egoism"
+            },
+            {
+              "label": "c",
+              "text": "Ethical Egoism"
+            },
+            {
+              "label": "d",
+              "text": "Rule Utilitarianism"
+            },
+            {
+              "label": "e",
+              "text": "Hedonsim"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.95
+        },
+        {
+          "number": "10",
+          "sourceNumber": "10",
+          "text": "تعرف الهجمات التي تستغل بروتوكول (TCP/IP) لتخلق حزم بيانات اصغر من الحجم المتفق عليه وعندما يتم تجميع تلك الحزم فان من الممكن لهذا النظام ان ينهار او يتوقف عن العمل",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Teardrop"
+            },
+            {
+              "label": "b",
+              "text": "Ping Of Death"
+            },
+            {
+              "label": "c",
+              "text": "SYN"
+            },
+            {
+              "label": "d",
+              "text": "UDP Flood"
+            },
+            {
+              "label": "e",
+              "text": "None of them"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.93
+        },
+        {
+          "number": "11",
+          "sourceNumber": "11",
+          "text": "من سمات الجرائم الحاسوبية صعوبة اتلاف او إخفاء الأدلة",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "12",
+          "sourceNumber": "12",
+          "text": "من اخلاقيات استخدام الحاسوب بين شخص وغيره",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "الحفاظ على خصوصية الاخرين"
+            },
+            {
+              "label": "b",
+              "text": "مراقبة الذات"
+            },
+            {
+              "label": "c",
+              "text": "عدم إضاعة الوقت"
+            },
+            {
+              "label": "d",
+              "text": "عدم لنظر الى المحرمات"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.92
+        },
+        {
+          "number": "13",
+          "sourceNumber": "13",
+          "text": "من البرامج الحاسوبية التي لا تحتاج الى ملف تنفيذي للقيام بأعمال تدميرية بحيث تعتمد على شبكة الانترنت للقيام بذلك",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Virus"
+            },
+            {
+              "label": "b",
+              "text": "Worms"
+            },
+            {
+              "label": "c",
+              "text": "Spyware"
+            },
+            {
+              "label": "d",
+              "text": "Trojan Horse"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.94
+        },
+        {
+          "number": "14",
+          "sourceNumber": "14",
+          "text": "يتكون نظام(TCP/IP) من أربعة طبقات تمر من خلالها البيانات , وفي كل طبقة تعمل مجموعة من البروتوكولات التي تخدم عمل كل طبقة. بروتوكول(HTTP) يعمل بطبقة",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Transport Layer"
+            },
+            {
+              "label": "b",
+              "text": "Internet Layer"
+            },
+            {
+              "label": "c",
+              "text": "Application Layer"
+            },
+            {
+              "label": "d",
+              "text": "Network Access Layer"
+            }
+          ],
+          "answer": "c",
+          "confidence": 0.93
+        },
+        {
+          "number": "15",
+          "sourceNumber": "15",
+          "text": "تعرف هجمة (UDP Flood) تستغل TCP/IP لتخلق حزمة بيانات تتعدى الحجم المتفق عليه و عند ارسال هذه الحزمة الى أي نظام فان من الممكن لهذا النظام ان ينهار او يتوقف عن العمل او يعيد التشغيل من تلقاء نفسه",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "16",
+          "sourceNumber": "16",
+          "text": "من مميزات احصنة طروادة",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "يتكاثر مثل ديدان الحاسوب"
+            },
+            {
+              "label": "b",
+              "text": "لا يلحق نفسه باي برنامج اخر"
+            },
+            {
+              "label": "c",
+              "text": "لا يستخدم لزرع ملفات التجسس في جهاز الحاسوب"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "17",
+          "sourceNumber": "17",
+          "dir": "ltr",
+          "text": "Emotivism claims that pleasure is the only good thing in human life , the end of life as the highest good:",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.95
+        },
+        {
+          "number": "18",
+          "sourceNumber": "18",
+          "text": "الملكية هي مسؤولية جامعي البيانات للتحكم في الوصول وتحديد المعلومات التي يحق للشخص الحصول عليها من الاخرين وكيفية استخدام المعلومات",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.92
+        },
+        {
+          "number": "19",
+          "sourceNumber": "19",
+          "text": "The Trigger هو الذي يمنح فيروس الحاسوب خاصية التناسخ والانتشار بشكل تلقائي",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "20",
+          "sourceNumber": "20",
+          "text": "تكون الاخلاقيات بين المستخدم وغيره من خلال تطبيق بعض الانظمة والقوانين التي تحمي المستخدمين والأجهزة",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.93
+        },
+        {
+          "number": "21",
+          "sourceNumber": "21",
+          "text": "الديدان التي تقوم بالانتقال عن طريق بروتوكول TCP\\IP مباشرة مثل دودة Blaster والتي تنتشر عشوائياً تسمى",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "IRC"
+            },
+            {
+              "label": "b",
+              "text": "Internet"
+            },
+            {
+              "label": "c",
+              "text": "Instant massaging"
+            },
+            {
+              "label": "d",
+              "text": "Email"
+            },
+            {
+              "label": "e",
+              "text": "Files sharing"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "22",
+          "sourceNumber": "22",
+          "text": "The Payload وهو الجزء الذي يحتوي على المهمة المناطة بفيروس الحاسوب لتنفيذها عند بدء نشاطه وانتشاره",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.93
+        },
+        {
+          "number": "23",
+          "sourceNumber": "23",
+          "text": "يتكون فيروس الحاسوب من أربعة أجزاء, الجزء الذي يعطي خاصية القدرة على الانتشار قبل اكتشافه ويكون عادة ضمن توقيت معين كساعة معينة او تاريخ معين هو",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "The Trigger"
+            },
+            {
+              "label": "b",
+              "text": "Replication"
+            },
+            {
+              "label": "c",
+              "text": "Protection"
+            },
+            {
+              "label": "d",
+              "text": "The Payload"
+            },
+            {
+              "label": "e",
+              "text": "None of them"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.95
+        },
+        {
+          "number": "24",
+          "sourceNumber": "24",
+          "dir": "ltr",
+          "text": "Which theory concerns with the will of the action; an action is good if the individual committing it had a good reason to do so :",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Deontology"
+            },
+            {
+              "label": "b",
+              "text": "Consequentialism"
+            },
+            {
+              "label": "c",
+              "text": "Relativism"
+            },
+            {
+              "label": "d",
+              "text": "Hedonism"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.96
+        },
+        {
+          "number": "25",
+          "sourceNumber": "25",
+          "text": "من انوع هجمات الحرمان من الخدمة حجب الخدمة التقليدي typical denial of service والذي يعتمد على",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "جهاز منفذ الهجوم فقط"
+            },
+            {
+              "label": "b",
+              "text": "يعتمد على جهاز master واجهزة slave"
+            },
+            {
+              "label": "c",
+              "text": "يستخدم جهازين فقط"
+            },
+            {
+              "label": "d",
+              "text": "لا شيء مما ذكر"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.93
+        },
+        {
+          "number": "26",
+          "sourceNumber": "26",
+          "text": "اذا صنفت الجريمة الالكترونية حسب الدوافع فان هذا التصنيف يشمل",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "هوية المجرم فقط"
+            },
+            {
+              "label": "b",
+              "text": "الدوافع العقائدية"
+            },
+            {
+              "label": "c",
+              "text": "المتعة والتسلية"
+            },
+            {
+              "label": "d",
+              "text": "هوية المجرم والذي ينفذ الجريمة والضحية التي تنفذ ضده"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "27",
+          "sourceNumber": "27",
+          "text": "اذا صنفت الجريمة الالكترونية حسب النوع فان هذا التصنيف لا يشمل الخداع والتغرير",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.95
+        },
+        {
+          "number": "28",
+          "sourceNumber": "28",
+          "text": "في هجمات حجب الخدمة الموزع distributed denial of service",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "يقوم الجهاز الرئيسي master device بتنفيذ عملية الهجوم الفعلية"
+            },
+            {
+              "label": "b",
+              "text": "تقوم الأجهزة التابعة slave devices بعملية الهجوم الفعلية"
+            },
+            {
+              "label": "c",
+              "text": "يقوم الجهاز الخادم server بتنفيذ عملية الهجوم الفعلية"
+            },
+            {
+              "label": "d",
+              "text": "تقوم الاجهزة التابعة slave devices باصدار امر تنفيذ الهجوم"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.93
+        },
+        {
+          "number": "29",
+          "sourceNumber": "29",
+          "text": "من طرق اكتشاف ومنع هجمات الحرمان من الخدمة الطرق ______ حيث يتم التقليل من احتمال التعرض للهجوم او على الأقل جعل الضحايا المستهدفين يستمرون في تقديم الخدمات للمستخدمين الشرعيين بالرغم من تعرضهم للهجوم",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "الوقائية"
+            },
+            {
+              "label": "b",
+              "text": "التفاعلية"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.93
+        },
+        {
+          "number": "30",
+          "sourceNumber": "30",
+          "text": "من اخلاقيات التعامل بين المستخدم والتكنولوجيا ذاتها هي",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "احترام الملكية الفكرية"
+            },
+            {
+              "label": "b",
+              "text": "تجنب استخدام وسيلة اتصالات غير مرخصة محلياً في التقاط الشبكة"
+            },
+            {
+              "label": "c",
+              "text": "احترام الذات وعدم تعريضها للخطر"
+            },
+            {
+              "label": "d",
+              "text": "الحفاظ على الخصوصية واسرار الاخرين"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.95
+        },
+        {
+          "number": "31",
+          "dir": "ltr",
+          "text": "“The action is good if it greatest for maximum number of people” refers to :",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Deontology"
+            },
+            {
+              "label": "b",
+              "text": "Human Nature"
+            },
+            {
+              "label": "c",
+              "text": "Altruism"
+            },
+            {
+              "label": "d",
+              "text": "Utilitarianism"
+            }
+          ],
+          "answer": "d",
+          "confidence": 0.96
+        },
+        {
+          "number": "32",
+          "dir": "ltr",
+          "text": "In Deontology , human actions are judged good or bad, right or wrong, depending on the results of such actions.",
+          "kind": "truefalse",
+          "options": [
+            {
+              "label": "a",
+              "text": "True"
+            },
+            {
+              "label": "b",
+              "text": "False"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.96
+        },
+        {
+          "number": "33",
+          "dir": "ltr",
+          "text": "which Theory claims that in fact what people seek in their everyday actions is pleasure:",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Ethical Egoism"
+            },
+            {
+              "label": "b",
+              "text": "Psychological Hedonism"
+            },
+            {
+              "label": "c",
+              "text": "Act Utilitarianism"
+            },
+            {
+              "label": "d",
+              "text": "Psychological Egoism"
+            }
+          ],
+          "answer": "b",
+          "confidence": 0.96
+        },
+        {
+          "number": "34",
+          "dir": "ltr",
+          "text": "which Theory claims that people ought to seek pleasure, and that pleasure is the moral good :",
+          "kind": "mcq",
+          "options": [
+            {
+              "label": "a",
+              "text": "Ethical Hedonsim"
+            },
+            {
+              "label": "b",
+              "text": "Psychological Egoism"
+            },
+            {
+              "label": "c",
+              "text": "Rule Utilitarianism"
+            },
+            {
+              "label": "d",
+              "text": "Ethical Egoism"
+            }
+          ],
+          "answer": "a",
+          "confidence": 0.96
+        }
+      ]
+    }
+  ]
+}

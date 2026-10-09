@@ -1,6 +1,7 @@
 import {createHash} from "node:crypto";
 import {readdir, readFile} from "node:fs/promises";
 import {basename, join} from "node:path";
+import {fileURLToPath} from "node:url";
 import {initializeApp, applicationDefault} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 
@@ -25,19 +26,23 @@ type ImportExam = {id: string; subjectId: string; label: string; pdfUrl: null; q
 
 const pilotSubjects: Record<string, string> = {
   "ثقافة صحية و اسعافات أولية": "first-aid",
-  "مقدمة في نظم قواعد البيانات": "database-intro",
-  "التنمية و البيئة": "environment-development",
-  "مهارات حياتية": "life-skills",
+  "مقدمة في نظم قواعد البيانات": "databases",
+  "التنمية و البيئة": "environment",
+  "اخلاقيات حاسوب": "computer-ethics",
+  "علوم عسكرية": "military-science",
 };
 const allowed = new Set(Object.values(pilotSubjects));
+const pilotFiles = new Set(["aid-mid.json", "database-final.json", "env-mid.json",
+  "ethics-mid.json", "military-mid.json"]);
 
 function args() {
   const argv = process.argv.slice(2);
-  const sourceDir = argv.find((part) => !part.startsWith("--"));
+  const sourceDir = argv.find((part) => !part.startsWith("--")) ??
+    fileURLToPath(new URL("./data/masar-5/", import.meta.url));
   const write = argv.includes("--write");
   const requested = argv.find((part) => part.startsWith("--subjects="))?.slice("--subjects=".length);
-  if (!sourceDir || (write && argv.includes("--dry-run"))) {
-    throw new Error("Usage: npm run import -- <source-folder> [--dry-run|--write] [--subjects=first-aid,database-intro,...]");
+  if (write && argv.includes("--dry-run")) {
+    throw new Error("Usage: npm run import -- [source-folder] [--dry-run|--write] [--subjects=first-aid,databases,...]");
   }
   const subjects = new Set(requested ? requested.split(",") : allowed);
   for (const subject of subjects) if (!allowed.has(subject)) throw new Error(`Not a pilot subject: ${subject}`);
@@ -62,17 +67,12 @@ function answerLabel(q: SourceQuestion, options: {label: string; text: string}[]
   const answer = String(q.answer).trim();
   const original = Array.isArray(q.options) ? q.options : [];
   const matchingOriginal = original.find((option) => String(option.label).trim() === answer);
-  const index = original.findIndex((option) => option === matchingOriginal);
   if (q.kind === "truefalse") {
-    const fromValue = truth(answer) ?? (matchingOriginal ? truth(String(matchingOriginal.text ?? "")) : undefined);
-    if (fromValue) return fromValue;
-    if (/^\d+$/.test(answer)) return truth(String(original[Number(answer) - 1]?.text ?? ""));
-    return undefined;
+    return original.length
+      ? matchingOriginal && truth(String(matchingOriginal.text ?? ""))
+      : truth(answer);
   }
-  if (matchingOriginal && index >= 0) return options[index]?.label;
-  if (/^\d+$/.test(answer)) return options[Number(answer) - 1]?.label;
-  if (/^[a-e]$/i.test(answer)) return options[answer.toLowerCase().charCodeAt(0) - 97]?.label;
-  return options.find((option) => normalize(option.text) === normalize(answer))?.label;
+  return matchingOriginal ? options.find((option) => option.label === answer)?.label : undefined;
 }
 
 function questionOptions(q: SourceQuestion): {label: string; text: string}[] {
@@ -94,7 +94,8 @@ function hash(value: string): string {
 
 async function collect(sourceDir: string, subjects: Set<string>) {
   const files = (await readdir(sourceDir)).filter((file) => file.endsWith(".json") &&
-    !file.startsWith("bench-") && file !== "test.json" && !file.includes("DRAFT")).sort();
+    pilotFiles.has(file) && !file.startsWith("bench-") && file !== "test.json" &&
+    !file.includes("DRAFT")).sort();
   const bySubject = new Map<string, {name: string; exams: ImportExam[]; questions: ImportQuestion[]; skipped: number}>();
   for (const file of files) {
     const source = JSON.parse(await readFile(join(sourceDir, file), "utf8")) as SourceFile;
@@ -117,7 +118,7 @@ async function collect(sourceDir: string, subjects: Set<string>) {
         if (!text || !answer || options.length < 2 || options.some((option) => !option.label || !option.text) ||
             new Set(options.map((option) => option.label)).size !== options.length) {
           group.skipped++;
-          console.warn(`Skipping ambiguous answer: ${file} section ${sectionIndex + 1} question ${String(q.number ?? position + 1)}`);
+          console.warn(`Skipping ambiguous answer: ${file} section ${sectionIndex + 1} question ${String(q.number ?? position + 1)} (answer: ${String(q.answer)})`);
           continue;
         }
         const id = `${examId}-${position + 1}-${hash(text)}`;
