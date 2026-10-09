@@ -45,6 +45,13 @@ class _AppShellState extends ConsumerState<AppShell> {
     _sliding = false;
   }
 
+  void _settle() {
+    if (!_pages.hasClients) return;
+    _sliding = false;
+    final shown = (_pages.page ?? 0).round();
+    if (shown != widget.navigationShell.currentIndex) widget.navigationShell.goBranch(shown);
+  }
+
   void _onSwiped(int index) {
     if (_sliding || index == widget.navigationShell.currentIndex) return;
     widget.navigationShell.goBranch(index);
@@ -61,10 +68,18 @@ class _AppShellState extends ConsumerState<AppShell> {
     final shell = widget.navigationShell;
     final mentorName = ref.watch(configProvider).value?.mentorName ?? '';
     return Scaffold(
-      body: PageView(
-        controller: _pages,
-        onPageChanged: _onSwiped,
-        children: [for (final child in widget.children) _KeepAlive(child: child)],
+      body: NotificationListener<ScrollEndNotification>(
+        // Whenever the pager comes to rest, the bar follows the page actually on
+        // screen. This also covers a slide cut short by a touch halfway through.
+        onNotification: (n) {
+          if (n.depth == 0) _settle();
+          return false;
+        },
+        child: PageView(
+          controller: _pages,
+          onPageChanged: _onSwiped,
+          children: [for (final child in widget.children) _KeepAlive(child: child)],
+        ),
       ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(

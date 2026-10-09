@@ -304,8 +304,8 @@ class SubjectProgressCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final readiness = ref.watch(progressProvider(enrollment.subjectId)).value?.readiness ??
-        enrollment.readiness;
+    final progress = ref.watch(progressProvider(enrollment.subjectId)).value;
+    final readiness = progress?.readiness ?? enrollment.readiness;
     final history = ref.watch(readinessHistoryProvider(enrollment.subjectId));
     final d = enrollment.examDate;
     return Container(
@@ -355,15 +355,22 @@ class SubjectProgressCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
-            child: SizedBox(
-              height: 96,
-              child: switch (history.value) {
-                final points? when points.length >= 2 => ReadinessLine(points: points),
-                _ => Center(
-                    child: Text('الرسم بيبين بعد يومين تمرين', style: AppText.caption),
+            child: switch (history.value) {
+              final points? when points.isNotEmpty && enrollment.diagnosticDone => ReadinessLine(
+                  points: points,
+                  examDate: enrollment.examDate,
+                  projected: progress?.projectedReadiness,
+                ),
+              _ => SizedBox(
+                  height: 96,
+                  child: Center(
+                    child: Text(
+                      enrollment.diagnosticDone ? 'عم نجهّز رسمك…' : 'بعد التشخيص بيطلعلك رسم جاهزيتك',
+                      style: AppText.caption,
+                    ),
                   ),
-              },
-            ),
+                ),
+            },
           ),
           Divider(height: 1, color: AppColors.border),
           InkWell(
@@ -395,70 +402,176 @@ class SubjectProgressCard extends ConsumerWidget {
   }
 }
 
-/// Readiness per active day: one teal line, 0–100, tap a point for its value.
+/// Readiness over real days: a solid teal line for what happened, and a dashed
+/// one from today to exam day for where the plan takes you. Shows from the very
+/// first day, so a student sees their path straight after the diagnostic.
 class ReadinessLine extends StatelessWidget {
-  const ReadinessLine({super.key, required this.points});
+  const ReadinessLine({super.key, required this.points, this.examDate, this.projected});
 
   final List<ReadinessPoint> points;
+  final DateTime? examDate;
+
+  /// Readiness on exam day if the student keeps to the plan.
+  final int? projected;
+
+  static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
   @override
   Widget build(BuildContext context) {
-    final spots = [
-      for (var i = 0; i < points.length; i++)
-        FlSpot(i.toDouble(), points[i].readiness.toDouble()),
-    ];
-    return Directionality(
-      // time runs left to right on a chart, even in an RTL app
-      textDirection: TextDirection.ltr,
-      child: LineChart(
-        LineChartData(
-          minY: 0,
-          maxY: 100,
-          gridData: FlGridData(
-            drawVerticalLine: false,
-            horizontalInterval: 50,
-            getDrawingHorizontalLine: (_) => FlLine(color: AppColors.border, strokeWidth: 1),
-          ),
-          borderData: FlBorderData(show: false),
-          titlesData: const FlTitlesData(show: false),
-          lineTouchData: LineTouchData(
-            touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) => AppColors.surfaceMuted,
-              getTooltipItems: (touched) => [
-                for (final t in touched)
-                  LineTooltipItem(
-                    '${points[t.x.toInt()].day.day}/${points[t.x.toInt()].day.month}\n'
-                    '${t.y.toInt()}%',
-                    AppText.caption.copyWith(color: AppColors.textPrimary),
+    final first = _day(points.first.day);
+    double x(DateTime d) => _day(d).difference(first).inDays.toDouble();
+    final actual = [for (final p in points) FlSpot(x(p.day), p.readiness.toDouble())];
+    final last = actual.last;
+    final exam = examDate;
+    final goal = projected;
+    // The exam sits at least a day to the right of today, so the dashed line always has length.
+    final examX = exam == null ? null : (x(exam) > last.x ? x(exam) : last.x + 1);
+    final ahead = examX != null && goal != null ? [last, FlSpot(examX, goal.toDouble())] : null;
+    final maxX = ahead?.last.x ?? (last.x == 0 ? 1 : last.x);
+    final today = points.last;
+
+    Widget legend(Color color, String text, {bool dashed = false}) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 18,
+              child: dashed
+                  ? Row(children: [
+                      for (var i = 0; i < 3; i++) ...[
+                        Container(width: 4, height: 2.5, color: color),
+                        if (i < 2) const SizedBox(width: 3),
+                      ],
+                    ])
+                  : Container(height: 2.5, color: color),
+            ),
+            const SizedBox(width: 6),
+            Flexible(child: Text(text, style: AppText.caption)),
+          ],
+        );
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(spacing: AppSpacing.lg, runSpacing: 4, children: [
+        legend(AppColors.accent, 'هلق ${today.readiness}%'),
+        if (ahead != null)
+          legend(AppColors.brand, 'يوم الامتحان $goal% إذا مشيت على الخطة', dashed: true),
+      ]),
+      const SizedBox(height: AppSpacing.sm),
+      SizedBox(
+        height: 110,
+        child: Directionality(
+          // time runs left to right on a chart, even in an RTL app
+          textDirection: TextDirection.ltr,
+          child: LineChart(
+            LineChartData(
+              minX: 0,
+              maxX: maxX,
+              minY: 0,
+              maxY: 100,
+              gridData: FlGridData(
+                drawVerticalLine: false,
+                horizontalInterval: 25,
+                getDrawingHorizontalLine: (v) =>
+                    FlLine(color: AppColors.border, strokeWidth: 1, dashArray: v == 0 ? null : [3, 4]),
+              ),
+              borderData: FlBorderData(show: false),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(),
+                // room for the «الامتحان» label under the last point
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 26,
+                    getTitlesWidget: (_, _) => const SizedBox.shrink(),
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    interval: 50,
+                    getTitlesWidget: (v, _) => Text('${v.toInt()}%', style: AppText.caption.copyWith(fontSize: 10.5)),
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 22,
+                    interval: maxX,
+                    getTitlesWidget: (v, _) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        v == 0 ? 'البداية' : (ahead != null && v == maxX ? 'الامتحان' : ''),
+                        style: AppText.caption.copyWith(fontSize: 11),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipColor: (_) => AppColors.surfaceMuted,
+                  getTooltipItems: (touched) => [
+                    for (final t in touched)
+                      LineTooltipItem(
+                        t.barIndex == 1 && t.spotIndex == 1
+                            ? 'يوم الامتحان\n${t.y.toInt()}%'
+                            : () {
+                                final d = first.add(Duration(days: t.x.toInt()));
+                                return '${d.day}/${d.month}\n${t.y.toInt()}%';
+                              }(),
+                        AppText.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                      ),
+                  ],
+                ),
+              ),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: actual,
+                  isCurved: actual.length > 2,
+                  preventCurveOverShooting: true,
+                  color: AppColors.accent,
+                  barWidth: 3,
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(
+                    checkToShowDot: (spot, _) => spot.x == last.x || actual.length == 1,
+                    getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                      radius: 5,
+                      color: AppColors.accent,
+                      strokeWidth: 2.5,
+                      strokeColor: AppColors.surface,
+                    ),
+                  ),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.accent.withValues(alpha: .25), AppColors.accent.withValues(alpha: 0)],
+                    ),
+                  ),
+                ),
+                if (ahead != null)
+                  LineChartBarData(
+                    spots: ahead,
+                    color: AppColors.brand,
+                    barWidth: 2.5,
+                    dashArray: const [6, 5],
+                    dotData: FlDotData(
+                      checkToShowDot: (spot, _) => spot.x == ahead.last.x,
+                      getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                        radius: 4.5,
+                        color: AppColors.surface,
+                        strokeWidth: 2.5,
+                        strokeColor: AppColors.brand,
+                      ),
+                    ),
                   ),
               ],
             ),
           ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              preventCurveOverShooting: true,
-              color: AppColors.accent,
-              barWidth: 2,
-              dotData: FlDotData(
-                checkToShowDot: (spot, _) => spot.x == spots.last.x,
-                getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                  radius: 4,
-                  color: AppColors.accent,
-                  strokeWidth: 2,
-                  strokeColor: AppColors.surface,
-                ),
-              ),
-              belowBarData: BarAreaData(
-                show: true,
-                color: AppColors.accent.withValues(alpha: .12),
-              ),
-            ),
-          ],
         ),
       ),
-    );
+    ]);
   }
 }
 
