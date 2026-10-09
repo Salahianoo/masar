@@ -37,8 +37,8 @@ empty `app/ functions/ admin/ scripts/` folders. Don't recreate them.
   `admins/{uid}` doc. Push, then tell Salah to share the Firebase config with Amer.
 
 ### 2. Import script: `scripts/import-questions.ts`
-- Input: a folder of Khazna JSON files (path passed as an argument, e.g.
-  `~/Desktop/Exam-Vault-Agent/out`). Skip `bench-*.json`, `test.json`, `*DRAFT*`.
+- Input: a folder of Khazna-shaped JSON files, by default **`scripts/data/masar-5/`** (the
+  five reviewed demo papers, see CONTRACT §9). Skip `bench-*.json`, `test.json`, `*DRAFT*`.
 - File shape: `{ subjectName, examTypeLabel, year?, language, sections: [{ title?, questions: [...] }] }`.
   Question: `{ number, text, kind, options?: [{label,text}], answer?, confidence }`.
   Kinds seen: mcq, truefalse, written, note, fill. **Import only mcq and truefalse that have an answer.**
@@ -50,7 +50,8 @@ empty `app/ functions/ admin/ scripts/` folders. Don't recreate them.
 - Writes `subjects`, `exams`, `questions` (no answer field) and `answerKeys`. Run it with
   `--dry-run` (prints counts per subject) or `--write`. Re-running must not duplicate data
   (use deterministic ids).
-- Only the 4 pilot subjects in CONTRACT §9 for now (flag `--subjects`).
+- The subjectIds and exact names are in the CONTRACT §9 table. Skip answers that don't match an
+  option label, and print them (aid-mid Q18 must show up in that list).
 
 ### 3. Concept tagging: `scripts/tag-concepts.ts`
 For one subject:

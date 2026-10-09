@@ -307,11 +307,33 @@ last 3 days.
 
 ## 9. Data source
 
-Questions come from a **snapshot copy** of Khazna's extracted exams
-(`Exam-Vault-Agent/out/*.json` on Salah's Mac). Only questions with an answer are imported.
-Pilot subjects for the demo: ثقافة صحية و اسعافات أولية, مقدمة في نظم قواعد البيانات,
-التنمية و البيئة, مهارات حياتية. Concepts, weights and explanations are generated once by
-`scripts/` with an LLM and reviewed by a human before the demo.
+Questions come from a **snapshot copy** of Khazna's exams, converted by Masar Agent
+(`~/Desktop/Masar-Agent`, `src/from-khazna.ts`). It makes no model calls: the questions and
+answers are read from Khazna's own data, and every answer comes from the source. Nothing is
+solved. The snapshot is committed at **`scripts/data/masar-5/`**: one `{file}.json` (the
+Khazna exam shape: `subjectName`, `examTypeLabel`, `sections[].questions[]` with `number`,
+`text`, `kind`, `options[{label,text}]`, `answer`) and one Masar-branded `{file}.pdf` per paper.
+The PDFs are the files for `exams/{examId}.pdfUrl` once they're uploaded to Storage.
+
+**Demo subjects (the five pilot papers, all reviewed):**
+
+| subjectId | `subjectName` (exact) | File | Usable questions* |
+|---|---|---|---|
+| `computer-ethics` | اخلاقيات حاسوب | `ethics-mid` (امتحان نصفي) | 34 |
+| `environment` | التنمية و البيئة | `env-mid` (امتحان نصفي) | 121 |
+| `first-aid` | ثقافة صحية و اسعافات أولية | `aid-mid` (امتحان نصفي) | 50 |
+| `databases` | مقدمة في نظم قواعد البيانات | `database-final` (الامتحان النهائي) | 33 |
+| `military-science` | علوم عسكرية | `military-mid` (ميد) | 38 |
+
+\* mcq/truefalse with an answer that names one of the question's own options; 276 in total.
+The importer must apply the same rule. Import only `mcq` and `truefalse` that have an answer,
+skip `note`/`written`/`fill`, and **skip any answer that doesn't match an option label**.
+Never guess what such an answer meant. Known case: `aid-mid` Q18 has answer «d» with options
+1–4 (also wrong in Khazna). Labels are kept as printed (`أ ب ج د`, `a b c d`, `A B C D`, or
+`1 2 3 4`; `aid-mid` Q26 really is labelled 1, 2, 3, 5). truefalse questions may come with
+options (`صح/خطأ`, `True/False`, `a/b`) or without (answer `صحيح`/`خطأ`); normalise per §4.
+Concepts, weights and explanations are generated once by `scripts/` with an LLM and reviewed
+by a human before the demo.
 
 ## 10. Definition of done for the demo
 
