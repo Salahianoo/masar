@@ -35,6 +35,39 @@ class ProfileScreen extends ConsumerWidget {
     if (context.mounted) context.go(AppRoutes.onboarding);
   }
 
+  /// The breakdown counts concepts across subjects, so a tap opens the map of
+  /// the one subject with a diagnostic, or asks which one when there are more.
+  Future<void> _openMap(
+      BuildContext context, List<Enrollment> items, String Function(String) subjectName) async {
+    final ready = items.where((e) => e.diagnosticDone).toList();
+    if (ready.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('كمّل التشخيص بمادة عشان تطلعلك خريطتها')));
+      return;
+    }
+    final subjectId = ready.length == 1
+        ? ready.single.subjectId
+        : await showModalBottomSheet<String>(
+            context: context,
+            showDragHandle: true,
+            builder: (context) => SafeArea(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text('خريطة أي مادة؟', style: AppText.heading),
+                const SizedBox(height: AppSpacing.sm),
+                for (final e in ready)
+                  ListTile(
+                    leading: Icon(Icons.map_outlined, color: AppColors.accent),
+                    title: Text(subjectName(e.subjectId)),
+                    trailing: Text('${e.readiness}%', style: AppText.label),
+                    onTap: () => Navigator.pop(context, e.subjectId),
+                  ),
+                const SizedBox(height: AppSpacing.md),
+              ]),
+            ),
+          );
+    if (subjectId != null && context.mounted) context.push(AppRoutes.map(subjectId));
+  }
+
   Future<void> _editName(BuildContext context, WidgetRef ref, String current) async {
     final name = await showDialog<String>(
       context: context,
@@ -107,7 +140,14 @@ class ProfileScreen extends ConsumerWidget {
           const ProfileSectionTitle('إحصائياتي'),
           ProfileStatGrid(stats: stats),
           const SizedBox(height: AppSpacing.md),
-          MasteryBreakdown(counts: stats.statusCounts),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              onTap: () => _openMap(context, items, subjectName),
+              child: MasteryBreakdown(counts: stats.statusCounts),
+            ),
+          ),
 
           const ProfileSectionTitle('موادي'),
           AsyncStateView<List<Enrollment>>(
