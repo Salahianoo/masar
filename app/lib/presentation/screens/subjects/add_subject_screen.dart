@@ -37,11 +37,19 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
 
   Future<void> _begin() async {
     final subjectId = _subjectId;
-    if (subjectId == null || _examDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اختار المادة وتاريخ الامتحان')),
-      );
+    // Say exactly what's missing; for a missing date, open the picker straight away.
+    if (subjectId == null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('اختار المادة اللي بدك تجهّز إلها')));
       return;
+    }
+    if (_examDate == null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('ضايل تحدّد موعد الامتحان')));
+      await _pickDate();
+      if (_examDate == null) return;
     }
     setState(() => _busy = true);
     try {
