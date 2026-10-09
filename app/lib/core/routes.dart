@@ -13,6 +13,10 @@ abstract final class AppRoutes {
   static String map(String subjectId) => '/map/$subjectId';
   static String summary(String subjectId) => '/summary/$subjectId';
   static String khaznaExam(String examId) => '/khazna/exam/$examId';
+  static String mentorChat(String subjectId, {String? conceptId}) => Uri(
+    path: '/mentor/$subjectId',
+    queryParameters: {'conceptId': ?conceptId},
+  ).toString();
 
   /// `mode`: "plan" or "exam". `conceptId` alone = concept practice.
   static String practice(

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/data/providers.dart' show todayPlanProvider;
+import '../../core/routes.dart';
 import '../mentor/mentor_intervention_sheet.dart';
 import 'practice_core.dart';
 import 'practice_args.dart';
@@ -112,8 +114,13 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     try {
       final nudge = result.nudge;
       if (nudge != null) {
-        await showMentorIntervention(context, nudge: nudge);
+        final action = await showMentorIntervention(context, nudge: nudge);
         if (!mounted) return;
+        if (action == MentorInterventionOutcome.openMentor) {
+          await context.push(AppRoutes.mentorChat(widget.args.subjectId,
+            conceptId: nudge.conceptId));
+          if (!mounted) return;
+        }
       }
       final q = await _prefetch;
       if (!mounted) return;
@@ -136,6 +143,7 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
 
   void _finish() {
     _finished = true;
+    ref.invalidate(todayPlanProvider(widget.args.subjectId));
     ref.read(lastPracticeResultProvider.notifier).set(_session.toResult());
     context.go('/summary/${widget.args.subjectId}');
   }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "400831862945",
+    "project_id": "masar-hackathon-jo-2026-salah",
+    "storage_bucket": "masar-hackathon-jo-2026-salah.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400831862945:android:d6bb7635a4b8c251b738e0",
+        "android_client_info": {
+          "package_name": "jo.masar.masar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlUjW5XVaSKRls5yx9fG0t4ksLmzJxt8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

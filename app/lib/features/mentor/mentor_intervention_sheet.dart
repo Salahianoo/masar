@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import '../practice/practice_core.dart';
 
 /// What the student chose in the intervention sheet.
-enum MentorInterventionOutcome { dismissed, tryAnother }
+enum MentorInterventionOutcome { dismissed, openMentor }
 
 /// The mentor steps in after two wrong answers in a row on one concept.
-// TODO(osama): step 2 adds «آه اشرحلي» (explanation + «عندي سؤال») and «جرّب سؤال جديد».
 Future<MentorInterventionOutcome> showMentorIntervention(
   BuildContext context, {
   required MentorNudge nudge,
@@ -29,7 +28,12 @@ Future<MentorInterventionOutcome> showMentorIntervention(
             ),
             const SizedBox(height: AppSpacing.xl),
             PrimaryButton(
-              label: 'لا، بكمل',
+              label: 'آه اشرحلي',
+              onPressed: () => Navigator.of(context).pop(MentorInterventionOutcome.openMentor),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton(
+              child: const Text('لا، بكمل'),
               onPressed: () => Navigator.of(context).pop(MentorInterventionOutcome.dismissed),
             ),
           ],
