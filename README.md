@@ -11,6 +11,7 @@
 | مين | الأداة | الشغل | البرومت |
 |---|---|---|---|
 | صلاح | Codex | Firebase، backend، الربط، داشبورد الأدمن | [docs/prompts/prompt-salah-codex.md](docs/prompts/prompt-salah-codex.md) |
+| صلاح | Codex | الأيقونة، الهوية، صور البوت، صور الـ pitch | [docs/prompts/prompt-salah-design-codex.md](docs/prompts/prompt-salah-design-codex.md) |
 | عامر | Claude | أساس التطبيق، التسجيل، التشخيص، الخريطة، الرئيسية، «أنا» | [docs/prompts/prompt-amer-claude.md](docs/prompts/prompt-amer-claude.md) |
 | أسامة | Claude | التمرين، البوت، تبويب خزنة، ملخص الجلسة | [docs/prompts/prompt-osama-claude.md](docs/prompts/prompt-osama-claude.md) |
 

@@ -25,7 +25,7 @@ Language: Arabic UI, RTL, Jordanian-friendly tone. Code, identifiers and comment
 
 | Person | Tool | Owns (only they edit these paths) |
 |---|---|---|
-| Salah | Codex | `functions/`, `admin/`, `scripts/`, `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `app/lib/core/data/firebase_masar_repository.dart` |
+| Salah | Codex | `functions/`, `admin/`, `scripts/`, `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `app/lib/core/data/firebase_masar_repository.dart`, and all visuals: `design/**`, `app/assets/**` (icon, brand, mentor images) |
 | Amer | Claude | `app/` shell: `app/lib/main.dart`, `app/lib/core/` (except the Firebase repository file), `app/lib/features/onboarding/`, `diagnostic/`, `map/`, `home/`, `profile/` |
 | Osama | Claude | `app/lib/features/practice/`, `mentor/`, `khazna/`, `summary/` |
 
@@ -56,6 +56,7 @@ masar/
   functions/                Cloud Functions, TypeScript, 2nd gen (Salah)
   admin/                    Admin dashboard, React + Vite + TS (Salah)
   scripts/                  import / tagging scripts, Node + TS (Salah)
+  design/                   brand, icon, mentor sources and pitch visuals (Salah)
   docs/CONTRACT.md          this file
   firestore.rules  firestore.indexes.json  firebase.json
 ```

@@ -37,3 +37,6 @@ app/android/key.properties
 
 # Script outputs
 scripts/out/
+
+# Design secrets
+design/.env
