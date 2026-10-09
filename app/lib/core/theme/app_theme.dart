@@ -18,7 +18,7 @@ abstract final class AppTheme {
     );
     final base = ThemeData(useMaterial3: true, colorScheme: scheme, fontFamily: AppText.fontFamily);
     final roundedBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppRadii.md),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       borderSide: const BorderSide(color: AppColors.border),
     );
 
@@ -42,8 +42,8 @@ abstract final class AppTheme {
         fillColor: AppColors.surface,
         hintStyle: AppText.label.copyWith(color: AppColors.textMuted),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
         border: roundedBorder,
         enabledBorder: roundedBorder,
@@ -76,7 +76,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.xl)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         ),
       ),
       snackBarTheme: SnackBarThemeData(

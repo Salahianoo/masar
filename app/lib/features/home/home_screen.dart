@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(enrollmentsProvider),
           isEmpty: (list) => list.isEmpty,
           emptyMessage: 'لسا ما سجّلت بأي مادة',
-          builder: (context, list) => _DevHub(subjectId: list.first.subjectId),
+          data: (list) => _DevHub(subjectId: list.first.subjectId),
         ),
       ),
     );
@@ -45,45 +45,45 @@ class _DevHub extends ConsumerWidget {
         Row(
           children: [
             const MentorAvatar(pose: MentorPose.wave),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.md),
             Expanded(child: Text('شاشة تجربة للـ core', style: AppText.title)),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.xl),
         AsyncStateView<SubjectProgress>(
           value: progress,
           onRetry: () => ref.invalidate(progressProvider(subjectId)),
-          builder: (context, p) => Column(
+          data: (p) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(child: ReadinessRing(value: p.readiness, label: 'جاهزيتك للامتحان')),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 'بتوصل ${p.projectedReadiness}% إذا مشيت على الخطة',
                 style: AppText.label,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
               for (final c in p.concepts) ConceptBar.fromMastery(c),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.xl),
         AsyncStateView<TodayPlan>(
           value: plan,
           onRetry: () => ref.invalidate(todayPlanProvider(subjectId)),
-          builder: (context, t) => Text(
+          data: (t) => Text(
             'خطة اليوم · ${t.minutes} دقيقة\n'
             '${t.items.map((i) => '${i.conceptName} ${i.done}/${i.count}${i.isReview ? ' (مراجعة)' : ''}').join('\n')}',
             style: AppText.body,
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.xl),
         PrimaryButton(
           label: 'جاوب سؤال عشوائي (يحدّث الأرقام)',
           onPressed: () => _answerRandom(ref),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         for (final (label, route) in [
           ('التشخيص', AppRoutes.diagnostic(subjectId)),
           ('الخريطة', AppRoutes.map(subjectId)),

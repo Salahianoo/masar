@@ -27,7 +27,7 @@ class SplashScreen extends ConsumerWidget {
         child: AsyncStateView<String>(
           value: start,
           onRetry: () => ref.invalidate(startRouteProvider),
-          builder: (context, route) {
+          data: (route) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) context.go(route);
             });

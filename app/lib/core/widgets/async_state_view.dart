@@ -22,7 +22,7 @@ class AsyncStateView<T> extends StatelessWidget {
   const AsyncStateView({
     super.key,
     required this.value,
-    required this.builder,
+    required this.data,
     this.onRetry,
     this.isEmpty,
     this.emptyMessage = 'ما في إشي هون لسا',
@@ -30,7 +30,7 @@ class AsyncStateView<T> extends StatelessWidget {
   });
 
   final AsyncValue<T> value;
-  final Widget Function(BuildContext context, T data) builder;
+  final Widget Function(T data) data;
   final VoidCallback? onRetry;
   final bool Function(T data)? isEmpty;
   final String emptyMessage;
@@ -40,11 +40,11 @@ class AsyncStateView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     // Keep showing data while a refresh is loading.
     if (value.hasValue && !value.hasError) {
-      final data = value.requireValue;
-      if (isEmpty?.call(data) ?? false) {
+      final d = value.requireValue;
+      if (isEmpty?.call(d) ?? false) {
         return StateMessage(icon: emptyIcon, message: emptyMessage);
       }
-      return builder(context, data);
+      return data(d);
     }
     if (value.hasError) {
       return StateMessage(
@@ -94,10 +94,10 @@ class StateMessage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 48, color: AppColors.textMuted),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             Text(message, style: AppText.body, textAlign: TextAlign.center),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               PrimaryButton(label: actionLabel!, onPressed: onAction, expanded: false),
             ],
           ],

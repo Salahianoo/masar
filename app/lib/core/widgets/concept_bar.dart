@@ -37,9 +37,9 @@ class ConceptBar extends StatelessWidget {
     final known = status != MasteryStatus.unknown;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.sm),
+      borderRadius: BorderRadius.circular(AppRadius.sm),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -48,16 +48,16 @@ class ConceptBar extends StatelessWidget {
                 Expanded(
                   child: Text(name, style: AppText.bodyBold, overflow: TextOverflow.ellipsis),
                 ),
-                const SizedBox(width: AppSpacing.xs),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   known ? '$mastery%' : status.labelAr,
                   style: AppText.bodyBold.copyWith(color: known ? color : AppColors.textMuted),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadii.pill),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
               child: TweenAnimationBuilder<double>(
                 tween: Tween(end: known ? mastery / 100 : 0),
                 duration: AppDurations.slow,
@@ -71,11 +71,11 @@ class ConceptBar extends StatelessWidget {
               ),
             ),
             if (warning != null) ...[
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   const Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.warning),
-                  const SizedBox(width: AppSpacing.xxs),
+                  const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(warning!, style: AppText.caption.copyWith(color: AppColors.warning)),
                   ),
