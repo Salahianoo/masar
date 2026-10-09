@@ -226,7 +226,7 @@ class FakeMasarRepository implements MasarRepository {
   @override
   Future<AppConfig> config() async {
     await _wait();
-    return const AppConfig(mentorName: 'المرشد', mentorEnabled: true);
+    return const AppConfig(mentorName: 'رفيق', mentorEnabled: true);
   }
 
   @override
