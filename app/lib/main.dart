@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/data/repository_provider.dart';
-import 'core/router.dart';
-import 'core/theme/app_theme.dart';
-import 'firebase_options.dart';
+import 'package:masar/core/di/repository_provider.dart';
+import 'package:masar/presentation/navigation/router.dart';
+import 'package:masar/presentation/themes/app_theme.dart';
+import 'package:masar/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:masar/core/data/learning_engine.dart';
-import 'package:masar/core/data/local_data.g.dart';
-import 'package:masar/core/data/local_masar_repository.dart';
-import 'package:masar/core/data/rafeeq_client.dart';
-import 'package:masar/core/models/models.dart';
+import 'package:masar/domain/services/learning_engine.dart';
+import 'package:masar/data/datasources/local/local_data.g.dart';
+import 'package:masar/data/repositories/local_masar_repository.dart';
+import 'package:masar/data/datasources/remote/rafeeq_client.dart';
+import 'package:masar/domain/entities/entities.dart';
 
 void main() {
   group('LearningEngine (CONTRACT §7)', () {

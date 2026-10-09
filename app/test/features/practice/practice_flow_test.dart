@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:masar/core/data/local_data.g.dart';
-import 'package:masar/core/data/local_masar_repository.dart';
-import 'package:masar/features/practice/practice_core.dart';
-import 'package:masar/features/practice/practice_args.dart';
-import 'package:masar/features/practice/practice_screen.dart';
-import 'package:masar/features/practice/widgets/option_card.dart';
+import 'package:masar/data/datasources/local/local_data.g.dart';
+import 'package:masar/data/repositories/local_masar_repository.dart';
+import 'package:masar/presentation/screens/practice/practice_core.dart';
+import 'package:masar/presentation/screens/practice/practice_args.dart';
+import 'package:masar/presentation/screens/practice/practice_screen.dart';
+import 'package:masar/presentation/screens/practice/widgets/option_card.dart';
 
 late LocalMasarRepository repo;
 
