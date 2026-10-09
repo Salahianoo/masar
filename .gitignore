@@ -45,3 +45,6 @@ design/.env
 pc/.env
 pc/cloudflared.yml
 pc/logs/
+
+# TEMPORARY for the contest: رفيق through هاشمي's PC door. Delete after the contest.
+app/rafeeq.local.json
