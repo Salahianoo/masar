@@ -88,7 +88,7 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
 3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
 4. **Extract use cases**: Diagnostic selection, daily plan building, and answer updates now live in pure `domain/usecases/`; the local repository handles storage and persistence. All Flutter tests remain green.
-5. **Firebase repository** has no `signOut` UI test and no session persistence (it relies on Firebase Auth).
+5. **Firebase session**: The profile sign-out confirmation and Google-login routing have a widget test. The repository signs out of Firebase Auth and Google; start-up reuses Firebase Auth's persisted user. A real Google account sign-in/restart/sign-out cycle still needs an on-device check.
 
 ## Don'ts
 - Don't touch Khazna (`~/Desktop/Exam-Vault*`, project `hu-pp-q`) except reading, and don't change هاشمي's setup.
