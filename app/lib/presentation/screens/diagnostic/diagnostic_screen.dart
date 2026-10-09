@@ -24,6 +24,11 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
   String? _chosen;
   AnswerResult? _result;
   bool _busy = false;
+
+  /// Right answers so far; the running percentage and the final score.
+  int _correct = 0;
+  int _answered = 0;
+  bool _finished = false;
   final Stopwatch _watch = Stopwatch();
 
   @override
@@ -37,7 +42,10 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
     try {
       final questions = await ref.read(masarRepositoryProvider).startDiagnostic(widget.subjectId);
       if (!mounted) return;
-      setState(() { _questions = questions; _index = 0; _chosen = null; _result = null; });
+      setState(() {
+        _questions = questions; _index = 0; _chosen = null; _result = null;
+        _correct = 0; _answered = 0; _finished = false;
+      });
       _watch..reset()..start();
     } catch (error) {
       if (mounted) setState(() => _error = error);
@@ -54,7 +62,13 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
       final result = await ref.read(masarRepositoryProvider).submitAnswer(
         questionId: question.id, chosen: label, ms: ms, source: AnswerSource.diagnostic,
       );
-      if (mounted) setState(() => _result = result);
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _answered++;
+          if (result.correct) _correct++;
+        });
+      }
     } catch (error) {
       if (mounted) {
         setState(() => _chosen = null);
@@ -78,7 +92,7 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
       await ref.read(masarRepositoryProvider).completeDiagnostic(widget.subjectId);
       ref.invalidate(enrollmentsProvider);
       ref.invalidate(progressProvider(widget.subjectId));
-      if (mounted) context.go(AppRoutes.map(widget.subjectId));
+      if (mounted) setState(() => _finished = true);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -105,7 +119,9 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
                 ]))
           : questions.isEmpty
               ? const Center(child: Text('ما في أسئلة تشخيص حالياً'))
-              : _questionBody(questions[_index], questions.length),
+              : _finished
+                  ? _scoreBody(questions.length)
+                  : _questionBody(questions[_index], questions.length),
       ),
     );
   }
@@ -131,7 +147,7 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
               state: optionStateFor(
                 label: option.label,
                 chosen: _chosen,
-                correctAnswer: null,
+                correctAnswer: _result?.correctAnswer,
               ),
               onTap: _chosen == null && !_busy ? () => _answer(option.label) : null,
             ),
@@ -141,17 +157,90 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
       )),
       if (_result != null) Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-        child: const Text('تم حفظ إجابتك. كمّل التشخيص عشان تشوف خريطتك.',
-            textAlign: TextAlign.center),
+        child: _AnswerFeedback(result: _result!, correct: _correct, answered: _answered),
       ),
       Padding(
         padding: const EdgeInsets.all(AppSpacing.screen),
         child: PrimaryButton(
-          label: _index + 1 == count ? 'شوف خريطتك' : 'التالي',
+          label: _index + 1 == count ? 'شوف نتيجتك' : 'التالي',
           loading: _busy,
           onPressed: _result == null ? null : _next,
         ),
       ),
     ],
   );
+
+  /// After the last answer: the total, then on to the concept map.
+  Widget _scoreBody(int count) {
+    final percent = count == 0 ? 0 : (_correct * 100 / count).round();
+    final good = percent >= 70;
+    final mid = percent >= 40;
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.screen),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Spacer(),
+        Center(child: MentorAvatar(
+          pose: good ? MentorPose.happy : mid ? MentorPose.pointing : MentorPose.thinking, size: 150)),
+        const SizedBox(height: AppSpacing.xl),
+        Text('نتيجة التشخيص', style: AppText.heading, textAlign: TextAlign.center),
+        const SizedBox(height: AppSpacing.sm),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: percent.toDouble()),
+          duration: const Duration(milliseconds: 900),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, _) =>
+              Text('${value.round()}%', style: AppText.display, textAlign: TextAlign.center),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text('جبت $_correct من $count صح', style: AppText.bodyBold, textAlign: TextAlign.center),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          good
+              ? 'بداية قوية! خريطتك بتورجيك شو ضايل تثبّته.'
+              : mid
+                  ? 'منيح كبداية. خريطتك بتورجيك وين تركّز.'
+                  : 'ولا يهمك، لهيك عملنا التشخيص. خطتك بتبلّش من الأساسيات.',
+          style: AppText.label,
+          textAlign: TextAlign.center,
+        ),
+        const Spacer(),
+        PrimaryButton(label: 'شوف خريطتك',
+            onPressed: () => context.go(AppRoutes.map(widget.subjectId))),
+      ]),
+    );
+  }
+}
+
+/// «صح ✓» or «غلط، الجواب: ب», with the score so far.
+class _AnswerFeedback extends StatelessWidget {
+  const _AnswerFeedback({required this.result, required this.correct, required this.answered});
+
+  final AnswerResult result;
+  final int correct;
+  final int answered;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = (result.correct ? MasteryStatus.strong : MasteryStatus.weak).color;
+    final percent = answered == 0 ? 0 : (correct * 100 / answered).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .1),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: color.withValues(alpha: .4)),
+      ),
+      child: Row(children: [
+        Icon(result.correct ? Icons.check_circle_rounded : Icons.cancel_rounded, color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            result.correct ? 'صح' : 'غلط، الجواب: ${result.correctAnswer}',
+            style: AppText.bodyBold.copyWith(color: color),
+          ),
+        ),
+        Text('$correct من $answered · $percent%', style: AppText.label),
+      ]),
+    );
+  }
 }

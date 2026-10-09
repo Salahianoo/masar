@@ -8,7 +8,7 @@ import 'package:masar/presentation/screens/diagnostic/diagnostic_screen.dart';
 import 'package:masar/presentation/screens/practice/widgets/option_card.dart';
 
 void main() {
-  testWidgets('diagnostic saves a choice without revealing correctness or readiness', (tester) async {
+  testWidgets('diagnostic shows right/wrong with the running score, then the total', (tester) async {
     tester.view.physicalSize = const Size(360 * 3, 740 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -29,14 +29,25 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(OptionCard).first);
-    await tester.pumpAndSettle();
+    var right = 0;
+    var total = 0;
+    while (find.text('شوف خريطتك').evaluate().isEmpty) {
+      await tester.tap(find.byType(OptionCard).first);
+      await tester.pumpAndSettle();
+      total++;
+      final states = tester.widgetList<OptionCard>(find.byType(OptionCard)).map((c) => c.state).toList();
+      expect(states, contains(OptionState.correct)); // the right answer is always shown
+      if (states.first == OptionState.correct) right++;
+      expect(find.textContaining('$right من $total · ${(right * 100 / total).round()}%'), findsOneWidget);
+      await tester.tap(find.textContaining(RegExp('التالي|شوف نتيجتك')));
+      await tester.pumpAndSettle();
+    }
 
-    expect(tester.widgetList<OptionCard>(find.byType(OptionCard)).map((card) => card.state),
-        isNot(contains(OptionState.correct)));
-    expect(tester.widgetList<OptionCard>(find.byType(OptionCard)).map((card) => card.state),
-        isNot(contains(OptionState.wrong)));
-    expect(find.textContaining('الجاهزية'), findsNothing);
-    expect(find.text('تم حفظ إجابتك. كمّل التشخيص عشان تشوف خريطتك.'), findsOneWidget);
+    expect(find.text('نتيجة التشخيص'), findsOneWidget);
+    expect(find.text('جبت $right من $total صح'), findsOneWidget);
+    expect(find.text('${(right * 100 / total).round()}%'), findsOneWidget);
+    await tester.tap(find.text('شوف خريطتك'));
+    await tester.pumpAndSettle();
+    expect(find.text('map'), findsOneWidget);
   });
 }
