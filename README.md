@@ -1,41 +1,71 @@
-# مسار (Masar)
+# مسار · Masar
 
-تطبيق تعلّم تكيّفي لطلاب الجامعات بالأردن، لتحدي **Education & learning**:
-*"Students learn at different paces with uneven access to support"*.
+**تطبيق تعلّم تكيّفي لطلاب الجامعات بالأردن.** بيعرف وين الطالب واقف بكل مفهوم، وبيبنيله خطة يومية
+على نقاط ضعفه، مرتبة حسب قديش كل مفهوم بيتكرر بالامتحانات الحقيقية، ومعه مرشد اسمه **رفيق** بيشرحله بلهجتنا.
 
-الطالب بيجاوب 8 أسئلة، وبتطلعله **خريطة** لكل مفهوم بالمادة مع نسبة إتقانه، و**نسبة جاهزية** للامتحان.
-كل يوم بتطلعله **خطة** على نقاط ضعفه، مرتبة حسب قديش كل مفهوم بيتكرر بالامتحانات الحقيقية.
-وإذا غلط مرتين بنفس المفهوم، **البوت** بيتدخل وبيشرحله. بنك الأسئلة جاي من **خزنة**، وهي تبويب جوّا التطبيق.
+> JORDAN.NEXT() · Smart Society & Public Services · **Education & learning**
+> *"Students learn at different paces with uneven access to support."*
+
+*An adaptive learning app for Jordanian university students. A short diagnostic builds a mastery map for
+every concept, a daily plan targets the weakest high-frequency concepts from real past exams, and the
+mentor رفيق steps in after repeated mistakes.*
+
+---
+
+## شو بيعمل
+| | |
+|---|---|
+| **تشخيص قصير** | 8 أسئلة من امتحانات سابقة حقيقية، وبيبيّن صح أو خطأ مع نتيجتك أول بأول. |
+| **خريطة المفاهيم** | نسبة إتقان لكل مفهوم بالمادة، ونسبة **جاهزية** للامتحان. |
+| **خطة اليوم** | أسئلة على المفاهيم الضعيفة، والأولوية للي بيتكرر أكثر بالامتحانات. |
+| **رفيق** | مرشد ذكي بيتدخل إذا غلط الطالب مرتين بنفس المفهوم، وبيشرح من أسئلة الامتحانات الحقيقية. |
+| **خزنة** | بنك امتحانات سابقة كتبويب جوّا التطبيق. |
+| **لوحة الإدارة** | متابعة الطلاب والمواد والأسئلة لحظياً: [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
+
+## كيف بيقيس مستوى الطالب
+نفس فكرة **تصنيف Elo** اللي بيستخدمه الاتحاد الدولي للشطرنج: كل جواب هو «مباراة» بين الطالب والسؤال.
+
+- احتمال إنه يجاوب صح: `P = 1 / (1 + e^-(θ − d))`، حيث θ مستوى الطالب بالمفهوم و d صعوبة السؤال.
+- بعد الجواب: `θ ← θ + K · (النتيجة − P)`. ‏K كبير بالبداية عشان نعرف مستواه بسرعة، وبيصغر مع التمرين.
+- السؤال كمان بيتعلّم صعوبته من كل الطلاب: `d ← d − 0.05 · (النتيجة − P)`.
+- **الإتقان** = `100 / (1 + e^-θ)`، و**الجاهزية** = مجموع (وزن المفهوم بالامتحانات × إتقانه).
+- **أولوية الخطة** = وزن المفهوم × (1 − الإتقان).
+
+الكود: [`functions/src/engine.ts`](functions/src/engine.ts) (السيرفر) و [`app/lib/domain/services/learning_engine.dart`](app/lib/domain/services/learning_engine.dart) (التطبيق).
+
+## البيانات
+- **5 مواد و 276 سؤال** من امتحانات سابقة حقيقية، مع **34 مفهوم** موزونة حسب تكرارها.
+- الأجوبة من المصدر فقط. أي جواب مشكوك فيه بينعلَّم وما بينعرض للطالب (6 أسئلة حالياً).
+
+## التقنيات
+| الجزء | التقنية |
+|---|---|
+| التطبيق | Flutter (iOS + Android)، Riverpod، go_router، Clean Architecture |
+| الـ backend | Firebase: Firestore، Cloud Functions (TypeScript)، Auth، Hosting |
+| رفيق | نموذج لغوي محلي (Qwen 3.5 9B) على جهاز الفريق |
+| لوحة الإدارة | React + Vite |
+
+```
+app/        تطبيق Flutter (core · domain · data · presentation)
+functions/  Cloud Functions: محرك التعلّم، الخطة، رفيق
+admin/      لوحة الإدارة
+scripts/    تجهيز البيانات واستيرادها
+design/     الأيقونة وصور رفيق
+docs/       العقد المشترك وحالة المشروع
+```
+
+## التشغيل
+```bash
+cd app
+flutter pub get
+flutter run                          # مع Firebase
+flutter run --dart-define=LOCAL=true # على الجهاز بدون backend
+flutter test
+```
 
 ## الفريق
-| مين | الأداة | الشغل | البرومت |
-|---|---|---|---|
-| صلاح | Codex | Firebase، backend، الربط، داشبورد الأدمن | [docs/prompts/prompt-salah-codex.md](docs/prompts/prompt-salah-codex.md) |
-| صلاح | Codex | الأيقونة، الهوية، صور البوت، صور الـ pitch | [docs/prompts/prompt-salah-design-codex.md](docs/prompts/prompt-salah-design-codex.md) |
-| عامر | Claude | أساس التطبيق، التسجيل، التشخيص، الخريطة، الرئيسية، «أنا» | [docs/prompts/prompt-amer-claude.md](docs/prompts/prompt-amer-claude.md) |
-| أسامة | Claude | التمرين، البوت، تبويب خزنة، ملخص الجلسة | [docs/prompts/prompt-osama-claude.md](docs/prompts/prompt-osama-claude.md) |
-
-**العقد المشترك:** [docs/CONTRACT.md](docs/CONTRACT.md). الكل بيلتزم فيه.
-
-## كيف تبلش
-```
-git clone https://github.com/Salahianoo/masar.git
-cd masar
-git checkout -b <اسمك>/setup
-```
-افتح المجلد بالـ AI تبعك (Codex أو Claude)، وانسخله البرومت تبعك من `docs/prompts/`.
-الـ AI رح يقرأ `AGENTS.md` أو `CLAUDE.md` لحاله، وهدول بيوجهوه للعقد.
-
-**الترتيب:** صلاح بيعمل إعداد Firebase، وعامر بيدفع أساس التطبيق بأول ساعة لساعتين، وأسامة بيبني فوقه.
-عامر وأسامة بيشتغلوا على بيانات وهمية (`flutter run --dart-define=MOCK=true`)، فما بيستنوا الـ backend.
-
-## قواعد
-- ما حدا بيعدّل ملف مش إله (العقد §2). بدك تغيير؟ احكي لصاحبه.
-- أي تغيير بالعقد بيتفق عليه الفريق أول.
-- كل واحد على branch تبعه، وبيدمج على `main` كثير.
-
-## لسا لازم نقرر
-- [ ] اسم التطبيق النهائي والأيقونة
-- [ ] اسم البوت وشكله الـ 3D (`app/assets/mentor/`: wave, happy, thinking, sorry, pointing)
-- [ ] الألوان (`app/lib/core/theme`)
-- [ ] نسأل المنظمين: مسموح نجهز البيانات أو الكود قبل المسابقة؟
+| مين | الشغل |
+|---|---|
+| **صلاح** | رفيق (المرشد الذكي)، الـ backend على Firebase، لوحة الإدارة، وجزء من واجهات التطبيق |
+| **عامر** | أساس التطبيق، التسجيل، التشخيص، الخريطة، الرئيسية، «أنا» |
+| **أسامة** | التمرين، تبويب خزنة، ملخص الجلسة |
