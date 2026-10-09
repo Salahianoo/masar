@@ -75,7 +75,7 @@ class OptionCard extends StatelessWidget {
                   children: [
                     if (showLabel) ...[
                       Text('${option.label}.',
-                          style: theme.textTheme.bodyLarge?.copyWith(color: fg, fontWeight: FontWeight.w600)),
+                          style: theme.textTheme.bodyLarge?.copyWith(color: fg, fontWeight: FontWeight.w500, height: 1.5)),
                       const SizedBox(width: AppSpacing.sm),
                     ],
                     Expanded(

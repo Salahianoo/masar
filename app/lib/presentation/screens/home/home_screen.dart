@@ -456,6 +456,8 @@ class _SubjectCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppText.heading.copyWith(
                       color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
                       height: 1.3,
                     ),
                   ),
@@ -600,7 +602,9 @@ class _ReadinessRing extends StatelessWidget {
                   v == null ? '؟' : '${(t * 100).round()}%',
                   style: AppText.title.copyWith(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
                   ),
                 ),
                 Text(

@@ -103,7 +103,7 @@ class _MasarSplashAnimationState extends State<MasarSplashAnimation>
                 child: Column(children: [
                   Text('مسار',
                       style: text.displaySmall?.copyWith(
-                          color: Colors.white, fontWeight: FontWeight.w800)),
+                          color: Colors.white, fontWeight: FontWeight.w900, height: 1.2)),
                   Text('MASAR',
                       style: text.labelMedium?.copyWith(
                           color: _Splash.glow.withValues(alpha: 0.85), letterSpacing: 5)),

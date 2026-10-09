@@ -45,7 +45,18 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: p.background,
       canvasColor: p.background,
       dividerColor: p.border,
-      textTheme: base.textTheme.apply(bodyColor: p.textPrimary, displayColor: p.textPrimary),
+      // Material's defaults are Regular (400), which Tajawal renders thin; lift
+      // reading text to Medium and titles to Bold, same as AppText.
+      textTheme: base.textTheme
+          .copyWith(
+            bodyLarge: base.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.5),
+            bodyMedium: base.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, height: 1.5),
+            titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            titleSmall: base.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            labelLarge: base.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            labelMedium: base.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
+          )
+          .apply(bodyColor: p.textPrimary, displayColor: p.textPrimary),
       iconTheme: IconThemeData(color: p.textSecondary),
       appBarTheme: AppBarTheme(
         backgroundColor: p.background,
@@ -66,7 +77,8 @@ abstract final class AppTheme {
       listTileTheme: ListTileThemeData(
         iconColor: p.accent,
         textColor: p.textPrimary,
-        subtitleTextStyle: text(13, FontWeight.w400, p.textSecondary),
+        titleTextStyle: text(16, FontWeight.w700, p.textPrimary),
+        subtitleTextStyle: text(13.5, FontWeight.w500, p.textSecondary),
         minVerticalPadding: AppSpacing.md,
       ),
       dividerTheme: DividerThemeData(color: p.border, thickness: 1, space: 1),
@@ -133,7 +145,7 @@ abstract final class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => text(
             13,
-            states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w400,
+            states.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w500,
             states.contains(WidgetState.selected) ? p.brand : p.textMuted,
           ),
         ),
