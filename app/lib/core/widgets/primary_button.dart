@@ -32,7 +32,7 @@ class PrimaryButton extends StatelessWidget {
             children: [
               Flexible(child: Text(label, style: AppText.button, overflow: TextOverflow.ellipsis)),
               if (icon != null) ...[
-                const SizedBox(width: AppSpacing.xs),
+                const SizedBox(width: AppSpacing.sm),
                 Icon(icon, size: 20, color: AppColors.onPrimary),
               ],
             ],
@@ -46,7 +46,7 @@ class PrimaryButton extends StatelessWidget {
         disabledBackgroundColor: AppColors.primary.withValues(alpha: loading ? 1 : 0.4),
         minimumSize: const Size(120, AppSizes.buttonHeight),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.lg)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
       ),
       child: child,
     );

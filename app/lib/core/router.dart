@@ -71,7 +71,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.mentor,
               builder: (context, state) =>
-                  const PlaceholderScreen(title: 'المرشد', showAppBar: false),
+                  const PlaceholderScreen(title: 'رفيق', showAppBar: false),
             ),
           ]),
           StatefulShellBranch(routes: [

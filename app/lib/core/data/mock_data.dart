@@ -12,7 +12,7 @@ const mockSubject = Subject(
   conceptCount: 8,
 );
 
-const mockConfig = AppConfig(mentorName: 'المرشد', mentorEnabled: true);
+const mockConfig = AppConfig(mentorName: 'رفيق', mentorEnabled: true);
 
 const mockConcepts = <Concept>[
   Concept(

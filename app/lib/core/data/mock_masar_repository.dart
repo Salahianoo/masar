@@ -465,17 +465,61 @@ class MockMasarRepository implements MasarRepository {
   }) async {
     await _latency(1400, 1600);
     _requireSignIn();
-    final concept = conceptId == null ? null : _conceptById[conceptId];
-    final question = messages.lastWhere((m) => m.isUser, orElse: () => const ChatMessage(role: 'user', text: '')).text;
+    final question = messages
+        .lastWhere((m) => m.isUser, orElse: () => const ChatMessage(role: 'user', text: ''))
+        .text;
+    final concept =
+        conceptId == null ? _inferConcept(subjectId, question) : _conceptById[conceptId];
     if (concept == null) {
+      // subject overview: the student's 3 weakest concepts
+      final weakest = _progressOf(subjectId).concepts.toList()
+        ..sort((a, b) => a.mastery.compareTo(b.mastery));
       return 'سؤال حلو! أنا هون عشان أساعدك بمادة «${mockSubject.name}». '
-          'احكيلي أي مفهوم محيّرك (مثلاً النزيف أو الكسور) وبشرحلك ياه خطوة خطوة.';
+          'إذا بدك نبلش من وين إنت أضعف: ${weakest.take(3).map((c) => c.name).join('، ')}. '
+          'احكيلي أي مفهوم محيّرك وبشرحلك ياه خطوة خطوة.';
     }
     final firstPoint = concept.explanation.split('\n').firstWhere((l) => l.trim().isNotEmpty);
     return 'خليني أبسّطلك **${concept.name}** 👇\n\n$firstPoint\n\n'
         '${question.isEmpty ? '' : 'وبالنسبة لسؤالك «$question»: '}'
         'ركّز على الفكرة الأساسية، وجرّب سؤال من امتحان سابق عشان تتأكد إنك فهمتها.';
   }
+
+  /// CONTRACT §8, no conceptId: normalize the Arabic and score each concept by word
+  /// overlap with its name (counts triple), explanation and question texts.
+  Concept? _inferConcept(String subjectId, String message) {
+    final words = _normalize(message).split(' ').where((w) => w.length >= 3).toSet();
+    if (words.isEmpty) return null;
+    Concept? best;
+    var bestScore = 0;
+    for (final c in _conceptsOf(subjectId)) {
+      final nameWords = _normalize(c.name).split(' ').toSet();
+      final body = _normalize([
+        c.explanation,
+        for (final q in _questions)
+          if (q.question.conceptIds.contains(c.id)) q.question.text,
+      ].join(' '));
+      var score = 0;
+      for (final w in words) {
+        if (nameWords.any((n) => n.contains(w) || w.contains(n))) score += 3;
+        if (body.contains(w)) score += 1;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = c;
+      }
+    }
+    return bestScore >= 3 ? best : null;
+  }
+
+  static String _normalize(String s) => s
+      .replaceAll(RegExp(r'[ً-ْـ]'), '') // diacritics + tatweel
+      .replaceAll(RegExp('[أإآ]'), 'ا')
+      .replaceAll('ة', 'ه')
+      .replaceAll('ى', 'ي')
+      .replaceAll(RegExp(r'^ال|(?<=\s)ال'), '') // drop the article so النزيف ~ نزيف
+      .replaceAll(RegExp(r'[^؀-ۿa-zA-Z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 
   @override
   Future<List<ReadinessPoint>> readinessHistory(String subjectId) async {

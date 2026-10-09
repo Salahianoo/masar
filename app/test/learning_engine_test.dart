@@ -148,6 +148,19 @@ void main() {
       await sub.cancel();
     });
 
+    test('askMentor without conceptId infers the concept from the message', () async {
+      final reply = await repo.askMentor(
+        subjectId: mockSubjectId,
+        messages: const [ChatMessage(role: 'user', text: 'ما فهمت شو الفرق بين النزيف الشرياني والوريدي')],
+      );
+      expect(reply, contains('النزيف'));
+      final overview = await repo.askMentor(
+        subjectId: mockSubjectId,
+        messages: const [ChatMessage(role: 'user', text: 'مرحبا')],
+      );
+      expect(overview, contains(mockSubject.name));
+    });
+
     test('examQuestions keeps paper order', () async {
       final qs = await repo.examQuestions('first-aid-final-2024');
       expect(qs.length, 13);
