@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:masar/core/data/mock_data.dart';
-import 'package:masar/core/data/mock_masar_repository.dart';
+import 'package:masar/core/data/local_data.g.dart';
+import 'package:masar/core/data/local_masar_repository.dart';
 import 'package:masar/features/practice/practice_core.dart';
 import 'package:masar/features/practice/practice_args.dart';
 import 'package:masar/features/practice/practice_screen.dart';
 import 'package:masar/features/practice/widgets/option_card.dart';
 
-late MockMasarRepository repo;
+late LocalMasarRepository repo;
 
 Future<void> pumpPractice(WidgetTester tester, String location) async {
   // A 360-dp-wide phone: any overflow fails the test.
@@ -45,12 +45,12 @@ Future<void> settle(WidgetTester tester) async {
 
 Question currentQuestion(WidgetTester tester) {
   final text = tester.widget<Text>(find.byKey(const Key('practice.question'))).data;
-  return buildMockQuestions().firstWhere((q) => q.question.text == text).question;
+  return buildLocalQuestions().firstWhere((q) => q.question.text == text).question;
 }
 
 Future<void> answer(WidgetTester tester, {required bool correctly}) async {
   final q = currentQuestion(tester);
-  final key = buildMockQuestions().firstWhere((item) => item.question.id == q.id).answer;
+  final key = buildLocalQuestions().firstWhere((item) => item.question.id == q.id).answer;
   final option = q.options.firstWhere((o) => (o.label == key) == correctly);
   await tester.tap(find.ancestor(of: find.text(option.text), matching: find.byType(OptionCard)));
   await settle(tester);
@@ -66,15 +66,15 @@ double readinessBarValue(WidgetTester tester) =>
 
 void main() {
   setUp(() async {
-    repo = MockMasarRepository(simulateLatency: false);
+    repo = LocalMasarRepository();
     await repo.signIn();
     await repo.updateProfile('طالب تجريبي');
-    await repo.enroll(mockSubjectId, DateTime.now().add(const Duration(days: 7)));
+    await repo.enroll('first-aid', DateTime.now().add(const Duration(days: 7)));
   });
 
   testWidgets('a correct answer moves readiness up live', (tester) async {
-    await pumpPractice(tester, '/practice/first-aid?conceptId=bleeding');
-    expect(find.text('النزيف · 1 من 8'), findsOneWidget);
+    await pumpPractice(tester, '/practice/first-aid?conceptId=wounds-bleeding');
+    expect(find.text('الجروح والنزيف · 1 من 8'), findsOneWidget);
     final before = readinessBarValue(tester);
 
     await answer(tester, correctly: true);
@@ -87,7 +87,7 @@ void main() {
   });
 
   testWidgets('two wrong answers on one concept open the mentor intervention', (tester) async {
-    await pumpPractice(tester, '/practice/first-aid?conceptId=bleeding');
+    await pumpPractice(tester, '/practice/first-aid?conceptId=wounds-bleeding');
 
     await answer(tester, correctly: false);
     expect(find.textContaining(RegExp(r'^الجاهزية \d+%')), findsOneWidget);
@@ -95,16 +95,16 @@ void main() {
         containsAll([OptionState.wrong, OptionState.correct]));
     await tapNext(tester);
     expect(find.textContaining('شكلك ملخبط'), findsNothing);
-    expect(find.text('النزيف · 2 من 8'), findsOneWidget);
+    expect(find.text('الجروح والنزيف · 2 من 8'), findsOneWidget);
 
     await answer(tester, correctly: false);
     await tapNext(tester);
-    expect(find.text('شكلك ملخبط شوي بـالنزيف. بدك أشرحلك بدقيقة؟'), findsOneWidget);
+    expect(find.text('شكلك ملخبط شوي بـالجروح والنزيف. بدك أشرحلك بدقيقة؟'), findsOneWidget);
 
     await tester.tap(find.text('لا، بكمل'));
     await settle(tester);
     expect(find.textContaining('شكلك ملخبط'), findsNothing);
-    expect(find.text('النزيف · 3 من 8'), findsOneWidget);
+    expect(find.text('الجروح والنزيف · 3 من 8'), findsOneWidget);
   });
 
   testWidgets('plan mode walks the plan and ends on the summary', (tester) async {
@@ -123,15 +123,15 @@ void main() {
   });
 
   testWidgets('exam mode shows the paper with its label', (tester) async {
-    await pumpPractice(tester, '/practice/first-aid?mode=exam&examId=first-aid-final-2024');
-    final paper = (await tester.runAsync(() => repo.examQuestions('first-aid-final-2024')))!;
-    expect(find.text('من نهائي 2024'), findsOneWidget);
+    await pumpPractice(tester, '/practice/first-aid?mode=exam&examId=aid-mid');
+    final paper = (await tester.runAsync(() => repo.examQuestions('aid-mid')))!;
+    expect(find.text('من امتحان نصفي'), findsOneWidget);
     expect(find.textContaining('1 من ${paper.length}'), findsOneWidget);
     expect(currentQuestion(tester).id, paper.first.id);
   });
 
   testWidgets('leaving mid-session asks for confirmation', (tester) async {
-    await pumpPractice(tester, '/practice/first-aid?conceptId=burns');
+    await pumpPractice(tester, '/practice/first-aid?conceptId=fractures-burns');
     await answer(tester, correctly: true);
     await tester.tap(find.byIcon(Icons.close));
     await settle(tester);

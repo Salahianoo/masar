@@ -1,6 +1,6 @@
 import '../models/models.dart';
 
-/// CONTRACT §6, verbatim. Implemented by MockMasarRepository and (Salah's)
+/// CONTRACT §6, verbatim. Implemented by LocalMasarRepository and (Salah's)
 /// FirebaseMasarRepository.
 abstract class MasarRepository {
   Future<void> signIn();                                  // anonymous auth

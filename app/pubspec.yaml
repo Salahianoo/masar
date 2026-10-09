@@ -75,6 +75,7 @@ flutter:
     - assets/mentor/
     - assets/icon/
     - assets/sound/
+    - assets/papers/
 
 flutter_launcher_icons:
   ios: true

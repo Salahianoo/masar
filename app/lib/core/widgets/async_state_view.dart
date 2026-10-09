@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/mock_masar_repository.dart';
+import '../data/local_masar_repository.dart';
 import '../theme/app_theme.dart';
 import 'primary_button.dart';
 
@@ -13,7 +13,7 @@ String friendlyError(Object error) {
     final m = error.message;
     if (m != null && m.isNotEmpty && RegExp(r'[؀-ۿ]').hasMatch(m)) return m;
   }
-  if (error is MockRepositoryException) return error.message;
+  if (error is LocalRepositoryException) return error.message;
   return 'صار في مشكلة صغيرة. جرّب كمان مرة';
 }
 

@@ -13,7 +13,7 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kUseMock) {
+  if (!kUseLocal) {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     if (const bool.fromEnvironment('FIREBASE_EMULATORS')) {
       const host = '127.0.0.1';

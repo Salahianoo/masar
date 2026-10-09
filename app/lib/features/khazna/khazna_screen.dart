@@ -116,7 +116,9 @@ class _KhaznaExamScreenState extends ConsumerState<KhaznaExamScreen> {
               : Column(children: [
                   Expanded(child: exam.pdfUrl == null || exam.pdfUrl!.isEmpty
                     ? const Center(child: Text('نسخة PDF مش مضافة بعد'))
-                    : SfPdfViewer.network(exam.pdfUrl!)),
+                    : exam.pdfUrl!.startsWith('asset:')
+                        ? SfPdfViewer.asset(exam.pdfUrl!.substring('asset:'.length))
+                        : SfPdfViewer.network(exam.pdfUrl!)),
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.screen),
                     child: PrimaryButton(label: 'حلّه كاختبار',
