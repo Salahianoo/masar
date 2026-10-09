@@ -93,26 +93,29 @@ final routerProvider = Provider<GoRouter>((ref) {
       ))),
 
       // ── the 4 tabs ──
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         pageBuilder: (context, state, navigationShell) => CustomTransitionPage<void>(
-          child: AppShell(navigationShell: navigationShell),
+          child: navigationShell,
           transitionDuration: const Duration(milliseconds: 380),
           transitionsBuilder: (context, animation, secondary, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
+        // The tabs live in a swipeable pager instead of a plain stack.
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            AppShell(navigationShell: navigationShell, children: children),
         branches: [
-          StatefulShellBranch(routes: [
+          StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.home, builder: (context, state) => const HomeScreen()),
           ]),
-          StatefulShellBranch(routes: [
+          StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.khazna,
               builder: (context, state) => const KhaznaScreen()),
           ]),
-          StatefulShellBranch(routes: [
+          StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.mentor,
               builder: (context, state) => const MentorScreen()),
           ]),
-          StatefulShellBranch(routes: [
+          StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
           ]),
         ],

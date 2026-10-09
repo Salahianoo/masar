@@ -110,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     children: [
       Row(
         children: [
-          const MentorAvatar(pose: MentorPose.wave, size: 52),
+          const _MentorShortcut(),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(greetingFor(name), style: AppText.title),
@@ -152,7 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Row(
           children: [
-            const MentorAvatar(pose: MentorPose.wave, size: 52),
+            const _MentorShortcut(),
             const SizedBox(width: AppSpacing.md),
             Expanded(child: Text(greetingFor(name), style: AppText.title)),
           ],
@@ -600,6 +600,40 @@ class _AddSubjectCard extends StatelessWidget {
               Text('جهّز حالك لامتحان ثاني', style: AppText.caption),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// رفيق waving in the header; a tap slides over to his tab.
+class _MentorShortcut extends StatefulWidget {
+  const _MentorShortcut();
+
+  @override
+  State<_MentorShortcut> createState() => _MentorShortcutState();
+}
+
+class _MentorShortcutState extends State<_MentorShortcut> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'احكي مع رفيق',
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _down = true),
+        onTapCancel: () => setState(() => _down = false),
+        onTapUp: (_) {
+          setState(() => _down = false);
+          HapticFeedback.lightImpact();
+          context.go(AppRoutes.mentor);
+        },
+        child: AnimatedScale(
+          scale: _down ? .88 : 1,
+          duration: const Duration(milliseconds: 120),
+          child: const MentorAvatar(pose: MentorPose.wave, size: 52),
         ),
       ),
     );
