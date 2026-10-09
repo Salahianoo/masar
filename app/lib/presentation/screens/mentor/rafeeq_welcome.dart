@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:masar/presentation/components/widgets.dart';
-import 'package:masar/presentation/screens/mentor/rafeeq_welcome_tokens.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 
 /// The chat's empty state: رفيق big over a soft glow, a greeting, and four
@@ -41,7 +40,7 @@ class RafeeqWelcome extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         Text(
           'أهلاً، أنا $mentorName',
-          style: AppText.title.copyWith(color: RafeeqColors.navy, fontSize: 26),
+          style: AppText.title.copyWith(color: AppColors.brand, fontSize: 26),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -86,7 +85,10 @@ class _GlowingRafeeq extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                colors: [RafeeqColors.glow, RafeeqColors.glowEdge],
+                colors: [
+                  AppColors.accent.withValues(alpha: 0.22),
+                  AppColors.accent.withValues(alpha: 0),
+                ],
                 stops: const [0.35, 1],
               ),
             ),
@@ -117,7 +119,7 @@ class SuggestionCard extends StatelessWidget {
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: AppColors.border),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -131,11 +133,11 @@ class SuggestionCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(icon, color: RafeeqColors.teal, size: 24),
+                  Icon(icon, color: AppColors.accent, size: 24),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(child: Text(text, style: AppText.body)),
                   const SizedBox(width: AppSpacing.sm),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
                 ],
               ),
             ),

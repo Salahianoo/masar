@@ -157,7 +157,7 @@ class _MentorScreenState extends ConsumerState<MentorScreen> {
                 ],
               )),
         if (subjectId != null && enabled) Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.screen, AppSpacing.sm, AppSpacing.screen, AppSpacing.md),
           child: Row(children: [
             Expanded(child: TextField(
               controller: _input,

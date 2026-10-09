@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:masar/core/di/repository_provider.dart';
 import 'package:masar/presentation/navigation/router.dart';
+import 'package:masar/presentation/state/theme_mode_provider.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 import 'package:masar/firebase_options.dart';
 
@@ -35,7 +36,10 @@ class MasarApp extends ConsumerWidget {
       title: 'مسار',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      themeMode: ThemeMode.light,
+      darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(themeModeProvider),
+      // AppColors switches palette at once; a cross-fade would mix the two.
+      themeAnimationDuration: Duration.zero,
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar')],
       localizationsDelegates: const [
@@ -43,7 +47,31 @@ class MasarApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) => _PaletteSync(child: child!),
       routerConfig: ref.watch(routerProvider),
     );
+  }
+}
+
+/// Points [AppColors] at the light or dark palette. Widgets read AppColors
+/// directly (not through Theme.of), so on a switch every open screen is
+/// rebuilt once, keeping its state.
+class _PaletteSync extends StatelessWidget {
+  const _PaletteSync({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (AppColors.use(Theme.of(context).brightness)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        void rebuild(Element e) {
+          e.markNeedsBuild();
+          e.visitChildren(rebuild);
+        }
+        if (context.mounted) (context as Element).visitChildren(rebuild);
+      });
+    }
+    return child;
   }
 }

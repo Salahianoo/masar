@@ -91,7 +91,7 @@ class _MentorTypingBubbleState extends State<MentorTypingBubble>
           height: 5,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color.lerp(AppColors.textMuted, const Color(0xFF44BFB7), lift),
+            color: Color.lerp(AppColors.textMuted, AppColors.accent, lift),
           ),
         ),
       ),

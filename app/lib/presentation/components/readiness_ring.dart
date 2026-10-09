@@ -11,7 +11,7 @@ class ReadinessRing extends StatelessWidget {
     required this.value,
     this.size = 168,
     this.label,
-    this.color = AppColors.primary,
+    this.color,
   });
 
   /// 0..100
@@ -20,7 +20,8 @@ class ReadinessRing extends StatelessWidget {
 
   /// Optional line under the number, e.g. «جاهزيتك للامتحان».
   final String? label;
-  final Color color;
+  /// Defaults to the brand teal.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,12 @@ class ReadinessRing extends StatelessWidget {
       builder: (context, v, _) => SizedBox.square(
         dimension: size,
         child: CustomPaint(
-          painter: _RingPainter(progress: v / 100, color: color, stroke: stroke),
+          painter: _RingPainter(
+            progress: v / 100,
+            color: color ?? AppColors.accent,
+            trackColor: AppColors.track,
+            stroke: stroke,
+          ),
           child: Center(
             child: Padding(
               padding: EdgeInsets.all(stroke * 2),
@@ -64,10 +70,16 @@ class ReadinessRing extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.color, required this.stroke});
+  _RingPainter({
+    required this.progress,
+    required this.color,
+    required this.trackColor,
+    required this.stroke,
+  });
 
   final double progress;
   final Color color;
+  final Color trackColor;
   final double stroke;
 
   @override
@@ -75,7 +87,7 @@ class _RingPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final arcRect = rect.deflate(stroke / 2);
     final track = Paint()
-      ..color = AppColors.track
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke;
     final fill = Paint()
@@ -92,5 +104,8 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.progress != progress || old.color != color || old.stroke != stroke;
+      old.progress != progress ||
+      old.color != color ||
+      old.trackColor != trackColor ||
+      old.stroke != stroke;
 }

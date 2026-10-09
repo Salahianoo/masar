@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/presentation/components/widgets.dart';
-import 'package:masar/presentation/screens/mentor/rafeeq_welcome_tokens.dart';
 import 'package:masar/presentation/state/providers.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 
@@ -60,7 +59,7 @@ class _ConceptSheet extends ConsumerWidget {
                       color: AppColors.surface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        side: const BorderSide(color: AppColors.border),
+                        side: BorderSide(color: AppColors.border),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
@@ -72,8 +71,8 @@ class _ConceptSheet extends ConsumerWidget {
                                 horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                             child: Row(
                               children: [
-                                const Icon(Icons.lightbulb_outline,
-                                    color: RafeeqColors.teal, size: 20),
+                                Icon(Icons.lightbulb_outline,
+                                    color: AppColors.accent, size: 20),
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(child: Text(c.name, style: AppText.body)),
                               ],
