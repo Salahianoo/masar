@@ -4,6 +4,7 @@ abstract final class AppRoutes {
   static const intro = '/welcome';
   static const onboarding = '/onboarding';
   static const addSubject = '/subjects/add';
+  static const howRating = '/how-we-measure';
 
   // tabs
   static const home = '/home';

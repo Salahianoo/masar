@@ -204,6 +204,12 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
           textAlign: TextAlign.center,
         ),
         const Spacer(),
+        TextButton.icon(
+          onPressed: () => context.push(AppRoutes.howRating),
+          icon: const Text('♞', style: TextStyle(fontSize: 18, height: 1)),
+          label: const Text('كيف انحسبت نتيجتك؟ زي تصنيف الشطرنج'),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         PrimaryButton(label: 'شوف خريطتك',
             onPressed: () => context.go(AppRoutes.map(widget.subjectId))),
       ]),

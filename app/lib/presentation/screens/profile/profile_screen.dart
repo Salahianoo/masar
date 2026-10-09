@@ -180,6 +180,19 @@ class ProfileScreen extends ConsumerWidget {
           const AppearanceSetting(),
 
           const ProfileSectionTitle('عام'),
+          ProfileTile(
+            leading: Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+              child: Text('♞', style: TextStyle(fontSize: 20, color: AppColors.brand, height: 1)),
+            ),
+            title: 'كيف بنقيس مستواك؟',
+            subtitle: 'نفس طريقة تصنيف أبطال الشطرنج',
+            onTap: () => context.push(AppRoutes.howRating),
+          ),
+          const SizedBox(height: AppSpacing.md),
           if (config != null && config.mentorEnabled) ...[
             ProfileTile(
               leading: const MentorBadge(size: 36),

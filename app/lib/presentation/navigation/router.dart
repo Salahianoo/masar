@@ -10,6 +10,7 @@ import 'package:masar/presentation/screens/mentor/mentor_screen.dart';
 import 'package:masar/presentation/screens/khazna/khazna_screen.dart';
 import 'package:masar/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:masar/presentation/screens/profile/profile_screen.dart';
+import 'package:masar/presentation/screens/profile/rating_explainer_screen.dart';
 import 'package:masar/presentation/screens/practice/practice_screen.dart';
 import 'package:masar/presentation/screens/subjects/add_subject_screen.dart';
 import 'package:masar/presentation/screens/summary/summary_screen.dart';
@@ -62,6 +63,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.intro, pageBuilder: (context, state) => _fade(state, const IntroScreen())),
       GoRoute(path: AppRoutes.onboarding,
           pageBuilder: (context, state) => _animated(state, const OnboardingScreen())),
+      GoRoute(path: AppRoutes.howRating,
+          pageBuilder: (context, state) => _animated(state, const RatingExplainerScreen())),
       GoRoute(path: AppRoutes.addSubject,
           pageBuilder: (context, state) => _animated(state, const AddSubjectScreen())),
       GoRoute(
