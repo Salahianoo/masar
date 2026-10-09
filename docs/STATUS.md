@@ -86,7 +86,7 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
    - Set Masar's three mentor secrets (`ANTHROPIC_API_KEY`, `MASAR_LLM_URL`, `MASAR_LLM_TOKEN`), then deploy `askMentor`. Do not reuse Khazna or هاشمي tokens.
    - Enable Firebase Storage and upload the five Masar PDFs; Firestore `exams.pdfUrl` is currently null.
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
-3. **Diagnostic reveals right/wrong**: CONTRACT §6/onboarding says it must not. Fix in `presentation/screens/diagnostic`.
+3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
 4. **Extract use cases**: `local_masar_repository.dart` (~750 lines) mixes data access with orchestration
    (diagnostic pick, plan build, answer update). Move those into `domain/usecases/`, keeping the tests green.
 5. **Firebase repository** has no `signOut` UI test and no session persistence (it relies on Firebase Auth).

@@ -8,7 +8,6 @@ import 'package:masar/presentation/navigation/router.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 import 'package:masar/presentation/components/widgets.dart';
 import 'package:masar/presentation/screens/practice/widgets/option_card.dart';
-import 'package:masar/presentation/screens/practice/widgets/practice_feedback.dart';
 
 class DiagnosticScreen extends ConsumerStatefulWidget {
   const DiagnosticScreen({super.key, required this.subjectId});
@@ -132,7 +131,7 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
               state: optionStateFor(
                 label: option.label,
                 chosen: _chosen,
-                correctAnswer: _result?.correctAnswer,
+                correctAnswer: null,
               ),
               onTap: _chosen == null && !_busy ? () => _answer(option.label) : null,
             ),
@@ -142,12 +141,8 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
       )),
       if (_result != null) Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-        child: PracticeFeedback(
-          correct: _result!.correct,
-          line: _result!.correct ? 'صح عليك 👌' : 'ولا يهمك، هيك بنتعلم',
-          readiness: _result!.readiness,
-          delta: _result!.readinessDelta,
-        ),
+        child: const Text('تم حفظ إجابتك. كمّل التشخيص عشان تشوف خريطتك.',
+            textAlign: TextAlign.center),
       ),
       Padding(
         padding: const EdgeInsets.all(AppSpacing.screen),
