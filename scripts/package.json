@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "seed:config": "tsx seed-config.ts"
+    "seed:config": "tsx seed-config.ts",
+    "seed:emulator": "tsx seed-emulator.ts",
+    "import": "tsx import-questions.ts"
   },
   "dependencies": {
     "firebase-admin": "^13.6.0"
