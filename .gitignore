@@ -40,3 +40,8 @@ scripts/out/
 
 # Design secrets
 design/.env
+
+# PC mentor (رفيق)
+pc/.env
+pc/cloudflared.yml
+pc/logs/
