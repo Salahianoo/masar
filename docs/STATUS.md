@@ -1,6 +1,6 @@
 # Masar: where we are (handoff)
 
-Snapshot: **2026-10-09, evening**. Updated on branch `salah/google-sign-in` after Blaze activation.
+Snapshot: **2026-10-09, 20:10**. Updated on branch `salah/app-flow` (built on Codex's local 3038baf + Amer's UI).
 Read this first, then `docs/CONTRACT.md`. Salah now owns the whole repo; Amer and Osama are paused.
 
 ## The product in two lines
@@ -20,7 +20,7 @@ flutter test                                                                 # 2
 node ../scripts/build-app-data.mjs   # regenerate the app's dataset after editing scripts/data/masar-5/*
 ```
 - `LOCAL=true` (the old `MOCK=true` also works) runs everything **on the device**, using the five real papers, with
-  no backend. Without it, the app uses Google sign-in and `FirebaseMasarRepository`; the seven learning functions are deployed, but cloud `askMentor` still needs its secrets (see Gaps).
+  no backend. Without it, the app uses `FirebaseMasarRepository` with anonymous auth (see "Start-up flow").
 - For the PC mentor, copy `app/rafeeq.local.example.json` to the ignored `app/rafeeq.local.json` and fill in
   only Masar's own `RAFEEQ_GATE_TOKEN` from the separate PC gateway (`pc/README.md`). Do not use هاشمي's token.
 - `flutter pub get/build` rewrites `app/analysis_options.yaml` every time. Revert it before committing.
@@ -61,6 +61,20 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 - `scripts/build-app-data.mjs` turns all of that into `local_data.g.dart` + `app/assets/papers/*.pdf`.
   It fails loudly if any usable question has no concept.
 
+## Start-up flow (since 2026-10-09 evening)
+splash → 3 intro slides (once per device, prefs key `masar.introSeen`) → name only → home.
+- Saving the name signs in anonymously and calls `updateProfile`, which gives the student a unique
+  **5-digit number** (`users/{uid}.studentId`, reserved in the private `studentIds/{n}` collection in the
+  same transaction). The profile header shows «رقمي 12345»; the admin dashboard lists and searches it.
+- Home with no subject shows one navy button «اختار المادة اللي بدك تختبرها» → `/subjects/add` → diagnostic.
+- `FirebaseMasarRepository.signIn()` validates a saved user with a forced token refresh; a dead session
+  (it used to hang the splash forever) is dropped and replaced. Auth and start-up reads have timeouts.
+- Pages slide+fade (`router.dart` `_animated`); reduced motion turns it into a cut.
+- The Google-only sign-in screen was removed from the flow. `FirebaseGoogleAccountService` is still in
+  `data/` for linking later, but nothing in the UI uses it.
+- Verified on the iPhone 17 Pro simulator against Firebase: sign-up → number 60716 → `users` + `studentIds`
+  written → relaunch lands on home. 38 Flutter tests pass.
+
 ## Done
 - 3D رفيق poses (`app/assets/mentor/`, sources in `design/mentor/3d`), his face as the mentor tab, and an
   «رفيق عم يحضّرلك الجواب» typing bubble.
@@ -85,7 +99,8 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 ## Gaps, in priority order
 1. **Admin dashboard**: Implemented and hosted. Verify the six pages using Salah's admin account and an active student. Demo users are labelled «بيانات تجريبية» and can be hidden; historical `statsDaily` aggregates still include them.
 2. **Firebase path**: Blaze, Firestore, import, rules and seven learning functions are live. Remaining:
-   - رفيق currently runs only through the local PC demo. Firebase `config/app` is `mentorSource=pc`, `mentorEnabled=false` until Masar's separate tunnel and token (`MASAR_LLM_URL`, `MASAR_LLM_TOKEN`) exist. Cloud fallback additionally needs `ANTHROPIC_API_KEY`. Then deploy `askMentor` and enable it. Do not reuse Khazna or هاشمي tokens.
+   - رفيق: `askMentor` is deployed with secrets `MASAR_LLM_URL`/`MASAR_LLM_TOKEN` (TEMPORARY: هاشمي's gate, see `docs/contest-temporary.md`) and `ANTHROPIC_API_KEY`="not-configured". `config/app` is `mentorEnabled=true`, `mentorSource=pc`.
+     **Blocker:** the `askmentor` Cloud Run service has no `roles/run.invoker` for `allUsers` (every other callable has it), so every call is rejected with 401 before the code runs and the app says رفيق is busy. Salah must approve granting it (Console → Cloud Run → askmentor → Security → "Allow public access", or `setIamPolicy`).
    - The five reviewed PDFs are bundled in the Flutter app and Firestore `exams.pdfUrl` points to their `asset:` paths, so they work without Firebase Storage. Enable Storage later only for new papers distributed after an app release.
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
 3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
