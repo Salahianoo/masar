@@ -9,6 +9,7 @@ import 'package:masar/presentation/screens/khazna/khazna_screen.dart';
 import 'package:masar/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:masar/presentation/screens/profile/profile_screen.dart';
 import 'package:masar/presentation/screens/practice/practice_screen.dart';
+import 'package:masar/presentation/screens/subjects/add_subject_screen.dart';
 import 'package:masar/presentation/screens/summary/summary_screen.dart';
 import 'package:masar/presentation/navigation/app_shell.dart';
 import 'package:masar/presentation/navigation/routes.dart';
@@ -22,6 +23,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
       GoRoute(path: AppRoutes.onboarding, builder: (context, state) => const OnboardingScreen()),
+      GoRoute(path: AppRoutes.addSubject, builder: (context, state) => const AddSubjectScreen()),
       GoRoute(
         path: '/diagnostic/:subjectId',
         builder: (context, state) =>

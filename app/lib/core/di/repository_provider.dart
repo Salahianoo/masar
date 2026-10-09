@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:masar/data/datasources/local/session_store.dart';
 import 'package:masar/data/repositories/firebase_masar_repository.dart';
 import 'package:masar/data/repositories/local_masar_repository.dart';
 import 'package:masar/domain/repositories/masar_repository.dart';
@@ -10,6 +11,6 @@ const bool kUseLocal = bool.fromEnvironment('LOCAL') || bool.fromEnvironment('MO
 
 /// The only way screens reach data. Never call Firebase directly.
 final masarRepositoryProvider = Provider<MasarRepository>((ref) {
-  if (kUseLocal) return LocalMasarRepository();
+  if (kUseLocal) return LocalMasarRepository(store: SharedPrefsSessionStore());
   return FirebaseMasarRepository();
 });

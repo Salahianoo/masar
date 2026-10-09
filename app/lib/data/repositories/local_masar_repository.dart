@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:masar/core/errors/app_exception.dart';
+import 'package:masar/data/datasources/local/session_store.dart';
 
 import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/domain/services/learning_engine.dart';
@@ -20,14 +21,22 @@ class LocalMasarRepository implements MasarRepository {
     this.simulateLatency = false,
     math.Random? random,
     RafeeqClient? rafeeq,
+    SessionStore? store,
   })  : _clock = clock ?? DateTime.now,
         _random = random ?? math.Random(),
-        _rafeeq = rafeeq ?? RafeeqClient();
+        _rafeeq = rafeeq ?? RafeeqClient(),
+        // ignore: prefer_initializing_formals, a named parameter can't be private
+        _store = store;
 
   final DateTime Function() _clock;
   final bool simulateLatency;
   final math.Random _random;
   final RafeeqClient _rafeeq;
+
+  /// Where the session survives a restart (SharedPreferences in the app).
+  /// Null keeps everything in memory, as in most tests.
+  final SessionStore? _store;
+  bool _restored = false;
 
   /// Everything practice may serve: flagged questions stay out.
   final List<LocalQuestion> _questions = buildLocalQuestions().where((q) => !q.flagged).toList();
@@ -111,7 +120,29 @@ class LocalMasarRepository implements MasarRepository {
   @override
   Future<void> signIn() async {
     await _latency();
+    if (!_restored) {
+      _restored = true;
+      await _restore();
+    }
     _signedIn = true;
+  }
+
+  @override
+  Future<void> signOut() async {
+    _signedIn = false;
+    _profile = null;
+    _enrollments.clear();
+    _mastery.clear();
+    _history.clear();
+    _plans.clear();
+    _attempts.clear();
+    for (final q in buildLocalQuestions()) {
+      _byId[q.question.id]?.difficulty = q.difficulty;
+    }
+    for (final id in _progressControllers.keys) {
+      _emit(id);
+    }
+    await _store?.clear();
   }
 
   @override
@@ -128,6 +159,7 @@ class LocalMasarRepository implements MasarRepository {
     final name = displayName.trim();
     if (name.isEmpty) throw const LocalRepositoryException('اكتب اسمك');
     _profile = UserProfile(uid: 'local-user', displayName: name);
+    await _persist();
   }
 
   @override
@@ -180,6 +212,7 @@ class LocalMasarRepository implements MasarRepository {
         Enrollment(subjectId: subjectId, examDate: examDate, diagnosticDone: false, readiness: 0);
     _stateOf(subjectId);
     _emit(subjectId); // projectedReadiness depends on daysLeft
+    await _persist();
   }
 
   @override
@@ -241,6 +274,7 @@ class LocalMasarRepository implements MasarRepository {
     _enrollments[subjectId] = e.copyWith(diagnosticDone: true, readiness: p.readiness);
     _history.putIfAbsent(subjectId, () => {})[_today] = p.readiness;
     _emit(subjectId);
+    await _persist();
     return p;
   }
 
@@ -252,7 +286,11 @@ class LocalMasarRepository implements MasarRepository {
     _requireSignIn();
     _checkSubject(subjectId);
     final key = '${subjectId}_$_today';
-    return _plans[key] ??= _buildPlan(subjectId);
+    final existing = _plans[key];
+    if (existing != null) return existing;
+    final plan = _plans[key] = _buildPlan(subjectId);
+    await _persist();
+    return plan;
   }
 
   TodayPlan _buildPlan(String subjectId) {
@@ -429,6 +467,7 @@ class LocalMasarRepository implements MasarRepository {
     final confused =
         recent.length >= 2 && !recent[recent.length - 1] && !recent[recent.length - 2];
     final concept = _conceptById[q.primaryConceptId]!;
+    await _persist();
 
     return AnswerResult(
       correct: correct,
@@ -463,6 +502,89 @@ class LocalMasarRepository implements MasarRepository {
       status: LearningEngine.status(attempts: s.attempts, mastery: LearningEngine.mastery(s.theta)),
     );
     _plans[key] = plan.copyWith(items: items, completed: items.every((i) => i.isDone));
+  }
+
+  // ── session persistence ──────────────────────────────────────────────────
+
+  /// Attempts kept in the snapshot: enough for "skip what you answered in the
+  /// last few days", without the snapshot growing forever.
+  static const _keptAttempts = 400;
+
+  Future<void> _persist() async {
+    final store = _store;
+    if (store == null || _profile == null) return;
+    await store.save({
+      'profile': _profile!.toJson(),
+      'enrollments': [for (final e in _enrollments.values) e.toJson()],
+      'mastery': {
+        for (final MapEntry(key: subjectId, value: states) in _mastery.entries)
+          subjectId: {for (final MapEntry(key: id, value: st) in states.entries) id: st.toJson()},
+      },
+      'history': _history,
+      'plans': {for (final MapEntry(:key, :value) in _plans.entries) key: value.toJson()},
+      'attempts': [
+        for (final a in _attempts.skip(math.max(0, _attempts.length - _keptAttempts)))
+          {'q': a.questionId, 'at': a.at.toIso8601String()},
+      ],
+      'difficulty': {
+        for (final q in _questions)
+          if (q.difficulty != 0) q.question.id: q.difficulty,
+      },
+    });
+  }
+
+  /// Puts back what [_persist] saved. Anything unreadable starts that part
+  /// fresh rather than blocking the launch; content that no longer exists
+  /// (a subject or concept removed from the dataset) is dropped.
+  Future<void> _restore() async {
+    final Map<String, dynamic>? snap;
+    try {
+      snap = await _store?.load();
+    } on Object {
+      return;
+    }
+    if (snap == null) return;
+    try {
+      _profile = UserProfile.fromJson(Map<String, dynamic>.from(snap['profile'] as Map));
+      for (final raw in (snap['enrollments'] as List? ?? const [])) {
+        final e = Enrollment.fromJson(Map<String, dynamic>.from(raw as Map));
+        if (localSubjects.any((s) => s.id == e.subjectId)) _enrollments[e.subjectId] = e;
+      }
+      final mastery = Map<String, dynamic>.from(snap['mastery'] as Map? ?? const {});
+      for (final MapEntry(key: subjectId, value: raw) in mastery.entries) {
+        if (!localSubjects.any((s) => s.id == subjectId)) continue;
+        final states = _stateOf(subjectId);
+        for (final MapEntry(key: conceptId, value: st) in Map<String, dynamic>.from(raw as Map).entries) {
+          states[conceptId]?.restore(Map<String, dynamic>.from(st as Map));
+        }
+      }
+      final history = Map<String, dynamic>.from(snap['history'] as Map? ?? const {});
+      for (final MapEntry(key: subjectId, value: days) in history.entries) {
+        _history[subjectId] = {
+          for (final MapEntry(:key, :value) in Map<String, dynamic>.from(days as Map).entries) key: (value as num).toInt(),
+        };
+      }
+      final plans = Map<String, dynamic>.from(snap['plans'] as Map? ?? const {});
+      for (final MapEntry(:key, :value) in plans.entries) {
+        if (key.endsWith('_$_today')) _plans[key] = TodayPlan.fromJson(Map<String, dynamic>.from(value as Map));
+      }
+      for (final raw in (snap['attempts'] as List? ?? const [])) {
+        final a = Map<String, dynamic>.from(raw as Map);
+        _attempts.add(_Attempt(questionId: a['q'] as String, at: DateTime.parse(a['at'] as String)));
+      }
+      final difficulty = Map<String, dynamic>.from(snap['difficulty'] as Map? ?? const {});
+      for (final MapEntry(:key, :value) in difficulty.entries) {
+        _byId[key]?.difficulty = (value as num).toDouble();
+      }
+    } on Object {
+      // A snapshot from an incompatible build: start clean instead of crashing.
+      _profile = null;
+      _enrollments.clear();
+      _mastery.clear();
+      _history.clear();
+      _plans.clear();
+      _attempts.clear();
+    }
   }
 
   // ── mentor + history ─────────────────────────────────────────────────────
@@ -591,6 +713,25 @@ class _ConceptState {
   int correct = 0;
   DateTime? lastSeen;
   final List<bool> recent = []; // last 3, newest last
+
+  Map<String, dynamic> toJson() => {
+        'theta': theta,
+        'attempts': attempts,
+        'correct': correct,
+        'lastSeen': lastSeen?.toIso8601String(),
+        'recent': recent,
+      };
+
+  void restore(Map<String, dynamic> json) {
+    theta = (json['theta'] as num).toDouble();
+    attempts = (json['attempts'] as num).toInt();
+    correct = (json['correct'] as num).toInt();
+    final seen = json['lastSeen'] as String?;
+    lastSeen = seen == null ? null : DateTime.parse(seen);
+    recent
+      ..clear()
+      ..addAll(List<bool>.from(json['recent'] as List? ?? const []));
+  }
 }
 
 class _Attempt {

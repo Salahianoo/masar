@@ -4,6 +4,8 @@ import 'package:masar/domain/entities/entities.dart';
 /// FirebaseMasarRepository.
 abstract class MasarRepository {
   Future<void> signIn();                                  // anonymous auth
+  /// Forgets this device's student: the next launch starts at onboarding.
+  Future<void> signOut();
   Future<UserProfile?> currentProfile();
   Future<void> updateProfile(String displayName);
   Future<AppConfig> config();

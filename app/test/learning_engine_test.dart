@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:masar/domain/services/learning_engine.dart';
 import 'package:masar/data/datasources/local/local_data.g.dart';
 import 'package:masar/data/repositories/local_masar_repository.dart';
+import 'package:masar/data/datasources/local/session_store.dart';
 import 'package:masar/data/datasources/remote/rafeeq_client.dart';
 import 'package:masar/domain/entities/entities.dart';
 
@@ -197,6 +198,57 @@ void main() {
         () => offline.askMentor(subjectId: subject, messages: const [ChatMessage(role: 'user', text: 'مرحبا')]),
         throwsA(isA<LocalRepositoryException>().having((e) => e.message, 'message', contains('رفيق مشغول'))),
       );
+    });
+
+    test('session survives a restart: name, subjects, mastery, history, plan', () async {
+      final store = MemorySessionStore();
+      final first = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      await first.signIn();
+      await first.updateProfile('سارة');
+      await first.enroll(subject, DateTime.now().add(const Duration(days: 7)));
+      await first.enroll('databases', DateTime.now().add(const Duration(days: 10)));
+      final answers = {for (final q in buildLocalQuestions()) q.question.id: q.answer};
+      for (final q in await first.startDiagnostic(subject)) {
+        await first.submitAnswer(questionId: q.id, chosen: answers[q.id]!, ms: 1, source: AnswerSource.diagnostic);
+      }
+      final before = await first.completeDiagnostic(subject);
+      final plan = await first.todayPlan(subject);
+
+      final second = LocalMasarRepository(rafeeq: rafeeq, store: store); // the app relaunched
+      await second.signIn();
+      expect((await second.currentProfile())?.displayName, 'سارة');
+      expect((await second.enrollments()).map((e) => e.subjectId), [subject, 'databases']);
+      expect((await second.enrollments()).first.diagnosticDone, isTrue);
+      final after = await second.progress(subject).first;
+      expect(after.readiness, before.readiness);
+      expect(after.concepts.map((c) => c.mastery), before.concepts.map((c) => c.mastery));
+      expect((await second.readinessHistory(subject)).last.readiness, before.readiness);
+      expect((await second.todayPlan(subject)).items.map((i) => i.conceptId), plan.items.map((i) => i.conceptId));
+    });
+
+    test('signOut forgets the student on this device', () async {
+      final store = MemorySessionStore();
+      final repo = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      await repo.signIn();
+      await repo.updateProfile('سارة');
+      await repo.enroll(subject, DateTime.now().add(const Duration(days: 7)));
+      await repo.signOut();
+      expect(await store.load(), isNull);
+
+      final relaunched = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      await relaunched.signIn();
+      expect(await relaunched.currentProfile(), isNull);
+      expect(await relaunched.enrollments(), isEmpty);
+    });
+
+    test('a second subject gets its own diagnostic and progress', () async {
+      await repo.enroll('databases', DateTime.now().add(const Duration(days: 10)));
+      final qs = await repo.startDiagnostic('databases');
+      expect(qs, isNotEmpty);
+      expect(qs.every((q) => q.subjectId == 'databases'), isTrue);
+      final p = await repo.progress('databases').first;
+      expect(p.concepts.length, 4);
+      expect((await repo.progress(subject).first).concepts.length, 8);
     });
 
     test('examQuestions keeps paper order', () async {

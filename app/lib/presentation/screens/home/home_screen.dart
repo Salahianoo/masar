@@ -31,7 +31,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: 'سجّل مادتك', onPressed: () => context.go(AppRoutes.onboarding),
           ));
         }
-        final selected = items.where((e) => e.subjectId == _selectedSubjectId).firstOrNull ?? items.first;
+        // Default to the newest subject, so a subject just added is the one shown.
+        final selected = items.where((e) => e.subjectId == _selectedSubjectId).firstOrNull ?? items.last;
         return _subjectHome(selected, items, name);
       },
     ));
@@ -52,13 +53,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: const Icon(Icons.person_outline), tooltip: 'ملفي'),
       ]),
       const SizedBox(height: AppSpacing.lg),
-      if (enrollments.length > 1) DropdownButtonFormField<String>(
-        initialValue: subjectId,
-        items: [for (final e in enrollments) DropdownMenuItem(
-          value: e.subjectId, child: Text(subjectNames[e.subjectId] ?? e.subjectId))],
-        onChanged: (id) => setState(() => _selectedSubjectId = id),
+      // Your subjects, and a way to add another one to prepare for.
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: [
+          for (final e in enrollments) Padding(
+            padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+            child: ChoiceChip(
+              label: Text(subjectNames[e.subjectId] ?? e.subjectId),
+              selected: e.subjectId == subjectId,
+              onSelected: (_) => setState(() => _selectedSubjectId = e.subjectId),
+            ),
+          ),
+          ActionChip(
+            avatar: const Icon(Icons.add, size: 18),
+            label: const Text('مادة'),
+            tooltip: 'أضف مادة جديدة',
+            onPressed: () => context.push(AppRoutes.addSubject),
+          ),
+        ]),
       ),
-      if (enrollments.length > 1) const SizedBox(height: AppSpacing.md),
+      const SizedBox(height: AppSpacing.md),
       Text(subjectNames[subjectId] ?? 'مادتك', style: AppText.heading),
       const SizedBox(height: AppSpacing.sm),
       _readinessCard(subjectId, progress, selected.daysLeft),
@@ -66,7 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!selected.diagnosticDone) ...[
         Text('باقي التشخيص عشان نبني خطتك', style: AppText.heading),
         const SizedBox(height: AppSpacing.md),
-        PrimaryButton(label: 'ابدأ 8 أسئلة التشخيص',
+        PrimaryButton(label: 'ابدأ أسئلة التشخيص',
           onPressed: () => context.go(AppRoutes.diagnostic(subjectId))),
       ] else ...[
         Row(children: [

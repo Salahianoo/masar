@@ -11,6 +11,27 @@ import 'package:masar/presentation/components/widgets.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  /// Forgets this device's student (name, subjects, progress) after a confirm.
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تسجيل خروج؟'),
+        content: const Text('رح ننسى اسمك وموادك وتقدّمك على هاد الجهاز.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('لا')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('اطلع')),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    await ref.read(masarRepositoryProvider).signOut();
+    ref
+      ..invalidate(profileProvider)
+      ..invalidate(enrollmentsProvider);
+    if (context.mounted) context.go(AppRoutes.onboarding);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
@@ -49,7 +70,13 @@ class ProfileScreen extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         PrimaryButton(label: 'أضف مادة جديدة',
-          onPressed: () => context.push(AppRoutes.onboarding)),
+          onPressed: () => context.push(AppRoutes.addSubject)),
+        const SizedBox(height: AppSpacing.md),
+        TextButton.icon(
+          onPressed: () => _signOut(context, ref),
+          icon: const Icon(Icons.logout),
+          label: const Text('تسجيل خروج'),
+        ),
       ],
     ));
   }

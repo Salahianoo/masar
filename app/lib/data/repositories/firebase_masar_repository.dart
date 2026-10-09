@@ -38,6 +38,9 @@ class FirebaseMasarRepository implements MasarRepository {
   }
 
   @override
+  Future<void> signOut() => _auth.signOut();
+
+  @override
   Future<UserProfile?> currentProfile() async {
     final doc = await _db.doc('users/$_uid').get();
     if (!doc.exists) return null;
