@@ -22,7 +22,7 @@ type ImportQuestion = {
   conceptIds: string[]; difficulty: number; attempts: number; correctCount: number;
   optionCounts: Record<string, number>; flagged: boolean;
 };
-type ImportExam = {id: string; subjectId: string; label: string; pdfUrl: null; questionCount: number; order: number};
+type ImportExam = {id: string; subjectId: string; label: string; pdfUrl: string; questionCount: number; order: number};
 type ConceptSource = {id: string; name: string; questions: string[]; explanation: string};
 type ConceptFile = {
   subjects: Record<string, {name: string; file: string; concepts: ConceptSource[]; mentorNotes?: string}>;
@@ -148,7 +148,8 @@ async function collect(sourceDir: string, subjects: Set<string>) {
           optionCounts: {}, flagged: Boolean(suspect[key])});
       }
       if (!questions.length) continue;
-      group.exams.push({id: examId, subjectId, label, pdfUrl: null,
+      group.exams.push({id: examId, subjectId, label,
+        pdfUrl: `asset:assets/papers/${basename(file, ".json")}.pdf`,
         questionCount: questions.length, order: group.exams.length});
       group.questions.push(...questions);
     }
@@ -185,7 +186,8 @@ async function main() {
     }
     for (const exam of group.exams) {
       const path = `exams/${exam.id}`;
-      if (!(await getDocument(path, token))) writes.push(putDoc(path, exam));
+      if (await getDocument(path, token)) writes.push(putDoc(path, {pdfUrl: exam.pdfUrl}, ["pdfUrl"]));
+      else writes.push(putDoc(path, exam));
     }
     for (const {id: questionId, answer, ...question} of group.questions) {
       const path = `questions/${questionId}`;

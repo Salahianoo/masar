@@ -16,7 +16,7 @@ Khazna's own app, repo and Firebase project (`hu-pp-q`) are never touched.
 cd app
 flutter run --dart-define=LOCAL=true                                         # real data, رفيق says «مشغول»
 flutter run --dart-define=LOCAL=true --dart-define-from-file=rafeeq.local.json   # + رفيق live (Salah's Mac only)
-flutter test                                                                 # 26 tests, all pass
+flutter test                                                                 # 28 tests, all pass
 node ../scripts/build-app-data.mjs   # regenerate the app's dataset after editing scripts/data/masar-5/*
 ```
 - `LOCAL=true` (the old `MOCK=true` also works) runs everything **on the device**, using the five real papers, with
@@ -84,7 +84,7 @@ Check with `grep -rn "package:masar/data" lib/presentation` (expect nothing) bef
 1. **Admin dashboard**: Implemented and hosted. Verify the six pages using Salah's admin account and an active student. Demo users are labelled «بيانات تجريبية» and can be hidden; historical `statsDaily` aggregates still include them.
 2. **Firebase path**: Blaze, Firestore, import, rules and seven learning functions are live. Remaining:
    - رفيق currently runs only through the local PC demo. Firebase `config/app` is `mentorSource=pc`, `mentorEnabled=false` until Masar's separate tunnel and token (`MASAR_LLM_URL`, `MASAR_LLM_TOKEN`) exist. Cloud fallback additionally needs `ANTHROPIC_API_KEY`. Then deploy `askMentor` and enable it. Do not reuse Khazna or هاشمي tokens.
-   - Enable Firebase Storage and upload the five Masar PDFs; Firestore `exams.pdfUrl` is currently null.
+   - The five reviewed PDFs are bundled in the Flutter app and Firestore `exams.pdfUrl` points to their `asset:` paths, so they work without Firebase Storage. Enable Storage later only for new papers distributed after an app release.
    - Run an end-to-end phone test of Google sign-in, diagnostic, plan and admin live updates.
 3. **Diagnostic answer reveal**: Fixed on this branch. The choice stays neutral and no correctness/readiness feedback appears until the concept map after all eight answers.
 4. **Extract use cases**: Diagnostic selection, daily plan building, and answer updates now live in pure `domain/usecases/`; the local repository handles storage and persistence. All Flutter tests remain green.
