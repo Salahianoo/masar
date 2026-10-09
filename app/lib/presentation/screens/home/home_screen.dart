@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,30 @@ import 'package:masar/domain/entities/entities.dart';
 import 'package:masar/presentation/navigation/router.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 import 'package:masar/presentation/components/widgets.dart';
+
+/// Ways رفيق says hello. One is picked per app launch, so it changes every
+/// time the app opens but stays put while it's open.
+const _greetings = [
+  'أهلاً يا {name}',
+  'هلا والله يا {name}',
+  'يا هلا بـ{name}',
+  'نوّرت يا {name}',
+  'شو الأخبار يا {name}؟',
+  'جاهز نكمّل يا {name}؟',
+  'يلا يا {name}، خطوة كمان',
+  'منيح إنك رجعت يا {name}',
+  'كيفك اليوم يا {name}؟',
+  'اشتقنالك يا {name}',
+  'يا مية هلا يا {name}',
+  'يلا نكسر الامتحان يا {name}',
+];
+
+final int _launchGreeting = math.Random().nextInt(_greetings.length);
+
+/// Today's hello for [name], or a general one before the name is known.
+String greetingFor(String name) => name.isEmpty
+    ? 'أهلاً فيك'
+    : _greetings[_launchGreeting].replaceAll('{name}', name);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -87,10 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const MentorAvatar(pose: MentorPose.wave, size: 52),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(
-              'أهلاً${name.isEmpty ? '' : ' يا $name'}',
-              style: AppText.title,
-            ),
+            child: Text(greetingFor(name), style: AppText.title),
           ),
         ],
       ),
@@ -131,17 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             const MentorAvatar(pose: MentorPose.wave, size: 52),
             const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                'صباح الخير${name.isEmpty ? '' : ' يا $name'}',
-                style: AppText.title,
-              ),
-            ),
-            IconButton(
-              onPressed: () => context.go(AppRoutes.profile),
-              icon: const Icon(Icons.person_outline),
-              tooltip: 'ملفي',
-            ),
+            Expanded(child: Text(greetingFor(name), style: AppText.title)),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
