@@ -29,6 +29,56 @@ export interface CandidateQuestion {
   conceptIds: string[];
 }
 
+export interface MentorConceptCandidate {
+  id: string;
+  name: string;
+  weight: number;
+  explanation: string;
+  questions: string[];
+}
+
+export function normalizeArabic(value: string): string {
+  return value.normalize("NFKC").replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/\u0640/g, "").replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه").replace(/ى/g, "ي")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+}
+
+const stopWords = new Set([
+  "كيف", "ما", "ماذا", "هل", "هو", "هي", "هذا", "هذه", "في", "من", "عن", "على",
+  "الي", "عند", "مع", "انا", "انت", "اذا", "ليش", "شو", "ايش", "بس", "بدي",
+  "سؤال", "الجواب", "الماده", "المفهوم", "اشرح", "شرح", "يعني", "بين",
+]);
+
+const meaningfulWords = (value: string): Set<string> =>
+  new Set(normalizeArabic(value).split(" ")
+    .map((word) => word.startsWith("وال") && word.length > 4 ? word.slice(1) : word)
+    .filter((word) => word.length >= 3 && !stopWords.has(word)));
+
+export function inferMentorConcepts(
+  message: string,
+  concepts: MentorConceptCandidate[],
+  threshold = 2,
+): string[] {
+  const words = meaningfulWords(message);
+  if (!words.size) return [];
+  const scores = concepts.map((concept) => {
+    const name = meaningfulWords(concept.name);
+    const explanation = meaningfulWords(concept.explanation);
+    const questions = meaningfulWords(concept.questions.join(" "));
+    let score = 0;
+    for (const word of words) {
+      if (name.has(word)) score += 3;
+      if (explanation.has(word)) score++;
+      if (questions.has(word)) score++;
+    }
+    return {id: concept.id, score, weight: concept.weight};
+  });
+  return scores.filter((item) => item.score >= threshold)
+    .sort((a, b) => b.score - a.score || b.weight - a.weight || a.id.localeCompare(b.id))
+    .slice(0, 2).map((item) => item.id);
+}
+
 export const probability = (theta: number, difficulty: number): number =>
   1 / (1 + Math.exp(-(theta - difficulty)));
 

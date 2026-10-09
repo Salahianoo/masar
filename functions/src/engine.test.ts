@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {
-  buildPlan, mastery, nudge, pickDiagnostic, pickNextQuestion, probability,
+  buildPlan, inferMentorConcepts, mastery, normalizeArabic, nudge, pickDiagnostic, pickNextQuestion, probability,
   projectedReadiness, readiness, status, studentStep, updateAbility, updateDifficulty,
   type WeightedConcept,
 } from "./engine";
@@ -56,5 +56,19 @@ describe("learning engine", () => {
     expect(nudge([false], "النزيف")).toBeNull();
     expect(nudge([false, true, false], "النزيف")).toBeNull();
     expect(nudge([true, false, false], "النزيف")).toContain("النزيف");
+  });
+
+  it("normalizes Arabic and grounds mentor questions on the strongest concepts", () => {
+    expect(normalizeArabic("الإِنعاشـ القَلبيّ، إصابة")).toBe("الانعاش القلبي اصابه");
+    const candidates = [
+      {id: "bleeding", name: "النزيف", weight: 0.4,
+        explanation: "النزيف الشرياني يحتاج ضغط مباشر", questions: ["ما أول إجراء للنزيف الشرياني؟"]},
+      {id: "fractures", name: "الكسور", weight: 0.3,
+        explanation: "ثبّت الطرف المكسور", questions: ["كيف نثبت الكسر؟"]},
+      {id: "stress", name: "الضغط النفسي", weight: 0.3,
+        explanation: "التوتر قد يؤثر على التركيز", questions: ["ما هو الضغط النفسي؟"]},
+    ];
+    expect(inferMentorConcepts("اشرح النزيف الشرياني والكسور", candidates)).toEqual(["bleeding", "fractures"]);
+    expect(inferMentorConcepts("وين القاعة؟", candidates)).toEqual([]);
   });
 });

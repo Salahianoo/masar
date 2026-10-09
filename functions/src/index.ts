@@ -116,8 +116,10 @@ export const enroll = onCall(async (request) => {
   const data = object(request.data);
   const subjectId = string(data.subjectId);
   const examDate = string(data.examDate);
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(examDate) ? new Date(`${examDate}T00:00:00Z`) : null;
   if (!subjectId || !/^\d{4}-\d{2}-\d{2}$/.test(examDate) ||
-      Number.isNaN(Date.parse(`${examDate}T00:00:00Z`)) || examDate <= today()) {
+      !parsed || Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== examDate ||
+      examDate <= today()) {
     fail("invalid-argument", "اختَر مادة وتاريخ امتحان مستقبلي صحيح.");
   }
   await requiredSubject(subjectId);
@@ -142,7 +144,9 @@ export const startDiagnostic = onCall(async (request) => {
     db.collection("questions").where("subjectId", "==", subjectId).get(),
   ]);
   const chosen = pickDiagnostic(conceptList(concepts.docs), questions.docs.map(candidate));
-  if (!chosen.length) fail("failed-precondition", "ما في أسئلة كافية للتشخيص حالياً.");
+  if (!chosen.length || chosen.length !== Math.min(8, concepts.size)) {
+    fail("failed-precondition", "ما في أسئلة كافية للتشخيص حالياً.");
+  }
   const byId = new Map(questions.docs.map((doc) => [doc.id, doc]));
   return {questions: chosen.map((question) => clientQuestion(question.id, byId.get(question.id)!.data()))};
 });
@@ -248,34 +252,33 @@ export const submitAnswer = onCall(async (request) => {
   }
   const questionRef = db.doc(`questions/${questionId}`);
   const answerRef = db.doc(`answerKeys/${questionId}`);
-  const [question, answer] = await Promise.all([questionRef.get(), answerRef.get()]);
-  if (!question.exists || !answer.exists) fail("not-found", "السؤال غير موجود.");
-  const questionData = question.data()!;
-  const subjectId = String(questionData.subjectId);
-  const conceptIds = questionData.conceptIds as string[];
-  if (!Array.isArray(conceptIds) || !conceptIds.length ||
-      !(questionData.options as {label: string}[]).some((option) => option.label === chosen)) {
-    fail("invalid-argument", "الخيار غير صحيح.");
-  }
-  const masteryRef = db.doc(`users/${uid}/mastery/${subjectId}`);
-  const enrollmentRef = db.doc(`users/${uid}/enrollments/${subjectId}`);
-  const userRef = db.doc(`users/${uid}`);
-  const statsRef = db.doc(`statsDaily/${today()}`);
-  const planRef = db.doc(`users/${uid}/plans/${subjectId}_${today()}`);
-  const conceptRefs = conceptIds.map((id) => db.doc(`subjects/${subjectId}/concepts/${id}`));
-  const correctAnswer = String(answer.get("answer"));
-  const isCorrect = chosen === correctAnswer;
   return db.runTransaction(async (tx) => {
-    const [q, a, masteryDoc, enrollment, user, statsDoc, plan, ...conceptDocs] = await Promise.all([
-      tx.get(questionRef), tx.get(answerRef), tx.get(masteryRef), tx.get(enrollmentRef),
+    const [q, a] = await Promise.all([tx.get(questionRef), tx.get(answerRef)]);
+    if (!q.exists || !a.exists) fail("not-found", "السؤال غير موجود.");
+    const currentQuestion = q.data()!;
+    const subjectId = String(currentQuestion.subjectId);
+    const conceptIds = currentQuestion.conceptIds as string[];
+    if (!Array.isArray(conceptIds) || !conceptIds.length ||
+        !Array.isArray(currentQuestion.options) ||
+        !(currentQuestion.options as {label: string}[]).some((option) => option.label === chosen)) {
+      fail("invalid-argument", "الخيار غير صحيح.");
+    }
+    const masteryRef = db.doc(`users/${uid}/mastery/${subjectId}`);
+    const enrollmentRef = db.doc(`users/${uid}/enrollments/${subjectId}`);
+    const userRef = db.doc(`users/${uid}`);
+    const statsRef = db.doc(`statsDaily/${today()}`);
+    const planRef = db.doc(`users/${uid}/plans/${subjectId}_${today()}`);
+    const conceptRefs = conceptIds.map((id) => db.doc(`subjects/${subjectId}/concepts/${id}`));
+    const correctAnswer = String(a.get("answer"));
+    const isCorrect = chosen === correctAnswer;
+    const [masteryDoc, enrollment, user, statsDoc, plan, ...conceptDocs] = await Promise.all([
+      tx.get(masteryRef), tx.get(enrollmentRef),
       tx.get(userRef), tx.get(statsRef), tx.get(planRef), ...conceptRefs.map((ref) => tx.get(ref)),
     ]);
-    if (!q.exists || !a.exists) fail("not-found", "السؤال غير موجود.");
     if (!enrollment.exists) fail("failed-precondition", "سجّل المادة أولاً.");
     if (!user.exists) fail("failed-precondition", "أكمل ملفك أولاً.");
     if (source === "plan" && !plan.exists) fail("failed-precondition", "اطلب خطة اليوم أولاً.");
     if (conceptDocs.some((doc) => !doc.exists)) fail("failed-precondition", "مفاهيم السؤال غير مكتملة.");
-    const currentQuestion = q.data()!;
     const states = readStates(masteryDoc.data());
     const beforeReadiness = Number(masteryDoc.get("readiness") ?? 0);
     const difficulty = Number(currentQuestion.difficulty ?? 0);
