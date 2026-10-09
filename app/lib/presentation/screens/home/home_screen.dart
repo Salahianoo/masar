@@ -112,9 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           const _MentorShortcut(),
           const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(greetingFor(name), style: AppText.title),
-          ),
+          Expanded(child: Text(greetingFor(name), style: AppText.title)),
         ],
       ),
       const SizedBox(height: AppSpacing.xxl),
@@ -175,15 +173,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () => context.go(AppRoutes.diagnostic(subjectId)),
           ),
         ] else ...[
-          Row(
-            children: [
-              Expanded(child: Text('خطة اليوم', style: AppText.heading)),
-              TextButton(
-                onPressed: () => context.push(AppRoutes.map(subjectId)),
-                child: const Text('خريطتك'),
-              ),
-            ],
-          ),
+          Text('خطة اليوم', style: AppText.heading),
+          const SizedBox(height: AppSpacing.xs),
           AsyncStateView<TodayPlan>(
             value: plan!,
             onRetry: () => ref.invalidate(todayPlanProvider(subjectId)),
@@ -425,87 +416,150 @@ class _SubjectCard extends ConsumerWidget {
     final progress = ref.watch(progressProvider(enrollment.subjectId)).value;
     final readiness = progress?.readiness ?? enrollment.readiness;
     final days = enrollment.daysLeft;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            const Color(0xFF2E5A97),
-            AppPalette.navy,
-            Color.lerp(AppPalette.navy, Colors.black, .3)!,
+    // The card opens the concept map, or the diagnostic if there's no map yet.
+    return _Pressable(
+      onTap: () => context.push(
+        enrollment.diagnosticDone
+            ? AppRoutes.map(enrollment.subjectId)
+            : AppRoutes.diagnostic(enrollment.subjectId),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              const Color(0xFF2E5A97),
+              AppPalette.navy,
+              Color.lerp(AppPalette.navy, Colors.black, .3)!,
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppPalette.navy.withValues(alpha: .3),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppPalette.navy.withValues(alpha: .3),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.heading.copyWith(
-                    color: Colors.white,
-                    height: 1.3,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.heading.copyWith(
+                      color: Colors.white,
+                      height: 1.3,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 3,
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: .14),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.event_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          days <= 0
+                              ? 'الامتحان اليوم'
+                              : days == 1
+                              ? 'باقي يوم'
+                              : 'باقي $days أيام',
+                          style: AppText.caption.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .14),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Row(
+                  const Spacer(),
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.event_rounded,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 4),
                       Text(
-                        days <= 0
-                            ? 'الامتحان اليوم'
-                            : days == 1
-                            ? 'باقي يوم'
-                            : 'باقي $days أيام',
-                        style: AppText.caption.copyWith(color: Colors.white),
+                        enrollment.diagnosticDone
+                            ? 'شوف خريطتك'
+                            : 'ابدأ التشخيص',
+                        style: AppText.label.copyWith(
+                          color: AppPalette.teal,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 12,
+                        color: AppPalette.teal,
                       ),
                     ],
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  !enrollment.diagnosticDone
-                      ? 'ابدأ التشخيص عشان نعرف وين واقف'
-                      : 'بتوصل ${progress?.projectedReadiness ?? readiness}% إذا مشيت على الخطة',
-                  style: AppText.caption.copyWith(
-                    color: Colors.white.withValues(alpha: .8),
+                  const SizedBox(height: 2),
+                  Text(
+                    !enrollment.diagnosticDone
+                        ? 'ابدأ التشخيص عشان نعرف وين واقف'
+                        : 'بتوصل ${progress?.projectedReadiness ?? readiness}% إذا مشيت على الخطة',
+                    style: AppText.caption.copyWith(
+                      color: Colors.white.withValues(alpha: .8),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          _ReadinessRing(value: enrollment.diagnosticDone ? readiness : null),
-        ],
+            const SizedBox(width: AppSpacing.md),
+            _ReadinessRing(value: enrollment.diagnosticDone ? readiness : null),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shrinks a touch while pressed, then runs [onTap].
+class _Pressable extends StatefulWidget {
+  const _Pressable({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_Pressable> createState() => _PressableState();
+}
+
+class _PressableState extends State<_Pressable> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _down = true),
+      onTapCancel: () => setState(() => _down = false),
+      onTapUp: (_) {
+        setState(() => _down = false);
+        HapticFeedback.lightImpact();
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _down ? .97 : 1,
+        duration: const Duration(milliseconds: 120),
+        child: widget.child,
       ),
     );
   }
