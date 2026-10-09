@@ -23,16 +23,20 @@ Language: Arabic UI, RTL, Jordanian-friendly tone. Code, identifiers and comment
 
 ## 2. Team and ownership
 
-| Person | Tool | Owns (only they edit these paths) |
-|---|---|---|
-| Salah | Codex | `functions/`, `admin/`, `scripts/`, `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `app/lib/core/data/firebase_masar_repository.dart`, and all visuals: `design/**`, `app/assets/**` (icon, brand, mentor images), plus `pc/` (رفيق on the PC) and `docs/mentor-persona.md` |
-| Amer | Claude | `app/` shell: `app/lib/main.dart`, `app/lib/core/` (except the Firebase repository file), `app/lib/features/onboarding/`, `diagnostic/`, `map/`, `home/`, `profile/` |
-| Osama | Claude | `app/lib/features/practice/`, `mentor/`, `khazna/`, `summary/` |
+Salah is now handling both frontend and backend. Amer and Osama's branches are inputs to
+the app integration, and their frontend work is paused. Salah may edit all Masar paths,
+including `app/`, while preserving the names, schema, callable signatures and learning
+math in this contract.
+
+| Person | Role now |
+|---|---|
+| Salah | Active owner of the full Masar repo: Flutter app, Firebase backend, admin dashboard, scripts and visuals. |
+| Amer | Frontend work paused; his `amer/core` branch supplied the app shell and shared core. |
+| Osama | Frontend work paused; his `osama/practice` branch supplied the practice flow. |
 
 - One Git repo, `main` protected by convention. Work on your own branch (`salah/...`,
   `amer/...`, `osama/...`), merge small and often. `git pull --rebase` before every push.
-- Need a change in a path you don't own? Ask its owner. Don't edit it yourself.
-- `app/pubspec.yaml` belongs to Amer. Osama asks Amer to add packages.
+- Salah coordinates future changes to all paths, including `app/pubspec.yaml`.
 
 ## 3. Repo layout
 
