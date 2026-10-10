@@ -54,14 +54,28 @@ design/     الأيقونة وصور رفيق
 docs/       العقد المشترك وحالة المشروع
 ```
 
-## التشغيل
+## التشغيل · How to run
+**الدليل الكامل: [docs/RUN.md](docs/RUN.md)**: المتطلبات، خطوات البناء، التشغيل، الاختبارات، جولة الديمو، وحل المشاكل.
+*Full guide: [docs/RUN.md](docs/RUN.md): requirements, build, run, tests, demo walkthrough, troubleshooting.*
+
+| الطريقة | |
+|---|---|
+| **APK للأندرويد** | ثبّت `Masar.apk` المرفق مع التسليم، بدون أي بناء |
+| **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
+| **من الكود** | Flutter 3.47 · JDK 17+ للأندرويد · Xcode للآيفون |
+
 ```bash
-cd app
+git clone https://github.com/Salahianoo/masar.git
+cd masar/app
 flutter pub get
-flutter run                          # مع Firebase
-flutter run --dart-define=LOCAL=true # على الجهاز بدون backend
-flutter test
+flutter run                          # التطبيق الكامل مع Firebase (الديمو)
+flutter run --dart-define=LOCAL=true # بدون إنترنت: كل شي على الجهاز
+flutter test                         # 39 اختبار
 ```
+Firebase جاهز ومعبّى بالبيانات، فما بتحتاج مشروع Firebase خاص فيك.
+
+## العرض · Presentation
+[presentation/Masar-presentation.pdf](presentation/Masar-presentation.pdf)
 
 ## الفريق
 | مين | الشغل |
