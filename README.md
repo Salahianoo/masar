@@ -12,6 +12,18 @@ mentor رفيق steps in after repeated mistakes.*
 
 ---
 
+## للحكّام · For the judges
+| | |
+|---|---|
+| **تطبيق الأندرويد (APK)** | [Masar.apk · Release v1.0.0](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) |
+| **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
+| حساب الحكّام (عرض فقط) | `judges@masar-demo.com` · كلمة المرور: `12345678` |
+| **دليل التشغيل الكامل** | [docs/RUN.md](docs/RUN.md) |
+| **العرض** | [presentation/Masar-presentation.pdf](presentation/Masar-presentation.pdf) |
+
+> حساب الحكّام **للعرض فقط**: بيشوف كل صفحات لوحة الإدارة، والتعديل مقفول من السيرفر.
+> *The judges' account is read-only: every admin page is visible, and all writes are blocked server-side.*
+
 ## شو بيعمل
 | | |
 |---|---|
@@ -60,7 +72,7 @@ docs/       العقد المشترك وحالة المشروع
 
 | الطريقة | |
 |---|---|
-| **APK للأندرويد** | ثبّت `Masar.apk` المرفق مع التسليم، بدون أي بناء |
+| **APK للأندرويد** | [حمّل Masar.apk](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) وثبّته، بدون أي بناء |
 | **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
 | **من الكود** | Flutter 3.47 · JDK 17+ للأندرويد · Xcode للآيفون |
 

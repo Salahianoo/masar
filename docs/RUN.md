@@ -30,7 +30,7 @@ They are public client identifiers, not secrets.
 
 ## 1. Android APK (no build needed)
 
-Install the APK we hand in with the submission (`Masar.apk`, about 80 MB) on any Android 7.0+ phone. Allow
+Download **[Masar.apk from Release v1.0.0](https://github.com/Salahianoo/masar/releases/tag/v1.0.0)** (about 80 MB) and install it on any Android 7.0+ phone. Allow
 "install from unknown sources" when asked. It is signed with a debug key, so uninstall any older Masar build first.
 
 ## 2. Admin dashboard (no build needed)
@@ -38,7 +38,7 @@ Install the APK we hand in with the submission (`Masar.apk`, about 80 MB) on any
 **https://masar-hackathon-jo-2026-salah.web.app**
 
 It shows students, subjects, questions and live statistics. Every new sign-up in the app appears here in
-real time. **Judges:** sign in with the demo account given in our submission form. It is a read-only viewer
+real time. **Judges:** sign in with `judges@masar-demo.com` / `12345678`. It is a read-only viewer
 (Firestore rules block every write for `admins/{uid}.role == "viewer"`), so you can open every page safely.
 
 ---
