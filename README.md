@@ -19,7 +19,7 @@ mentor رفيق steps in after repeated mistakes.*
 | **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
 | حساب الحكّام (عرض فقط) | `judges@masar-demo.com` · كلمة المرور: `12345678` |
 | **دليل التشغيل الكامل** | [docs/RUN.md](docs/RUN.md) |
-| **العرض** | [presentation/Masar-presentation.pdf](presentation/Masar-presentation.pdf) |
+| **العرض** | [PowerPoint](presentation/Masar-presentation.pptx) · [PDF](presentation/Masar-presentation.pdf) |
 
 > حساب الحكّام **للعرض فقط**: بيشوف كل صفحات لوحة الإدارة، والتعديل مقفول من السيرفر.
 > *The judges' account is read-only: every admin page is visible, and all writes are blocked server-side.*
@@ -87,7 +87,7 @@ flutter test                         # 39 اختبار
 Firebase جاهز ومعبّى بالبيانات، فما بتحتاج مشروع Firebase خاص فيك.
 
 ## العرض · Presentation
-[presentation/Masar-presentation.pdf](presentation/Masar-presentation.pdf)
+[PowerPoint](presentation/Masar-presentation.pptx) · [PDF](presentation/Masar-presentation.pdf)
 
 ## الفريق
 | مين | الشغل |
