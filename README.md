@@ -20,6 +20,7 @@ mentor رفيق steps in after repeated mistakes.*
 | حساب الحكّام (عرض فقط) | `judges@masar-demo.com` · كلمة المرور: `12345678` |
 | **دليل التشغيل الكامل** | [docs/RUN.md](docs/RUN.md) |
 | **العرض** | [PowerPoint](presentation/Masar-presentation.pptx) · [PDF](presentation/Masar-presentation.pdf) |
+| **عرض لوحة الإدارة** | [PowerPoint](presentation/Masar-admin-dashboard.pptx) · [PDF](presentation/Masar-admin-dashboard.pdf) |
 
 > حساب الحكّام **للعرض فقط**: بيشوف كل صفحات لوحة الإدارة، والتعديل مقفول من السيرفر.
 > *The judges' account is read-only: every admin page is visible, and all writes are blocked server-side.*
