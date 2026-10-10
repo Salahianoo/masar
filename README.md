@@ -16,14 +16,12 @@ practice uses real past-exam questions.*
 | | |
 |---|---|
 | **تطبيق الأندرويد الحالي** | ابنِه من الكود باتباع [دليل التشغيل](docs/RUN.md)؛ نسخة v1.0.0 القديمة أرشيف المسابقة |
-| **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
-| حساب الحكّام (عرض فقط) | `judges@masar-demo.com` · كلمة المرور: `12345678` |
+| **لوحة الإدارة** | نسخة المسابقة التاريخية؛ توقفت بعد حذف مشروع Firebase الخاص بمسار |
 | **دليل التشغيل الكامل** | [docs/RUN.md](docs/RUN.md) |
 | **العرض** | [PowerPoint](presentation/Masar-presentation.pptx) · [PDF](presentation/Masar-presentation.pdf) |
 | **عرض لوحة الإدارة** | [PowerPoint](presentation/Masar-admin-dashboard.pptx) · [PDF](presentation/Masar-admin-dashboard.pdf) |
 
-> حساب الحكّام **للعرض فقط**: بيشوف كل صفحات لوحة الإدارة، والتعديل مقفول من السيرفر.
-> *The judges' account is read-only: every admin page is visible, and all writes are blocked server-side.*
+> مشروع Firebase الخاص بمسار حُذف بعد المسابقة. شغّل النسخة الحالية محلياً باتباع الدليل أدناه.
 
 ## شو بيعمل
 | | |
@@ -32,7 +30,7 @@ practice uses real past-exam questions.*
 | **خريطة المفاهيم** | نسبة إتقان لكل مفهوم بالمادة، ونسبة **جاهزية** للامتحان. |
 | **خطة اليوم** | أسئلة على المفاهيم الضعيفة، والأولوية للي بيتكرر أكثر بالامتحانات. |
 | **خزنة** | بنك امتحانات سابقة كتبويب جوّا التطبيق. |
-| **لوحة الإدارة** | متابعة الطلاب والمواد والأسئلة لحظياً: [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
+| **لوحة الإدارة** | كود لوحة المسابقة محفوظ بالمستودع؛ الخدمة المستضافة توقفت بعد حذف مشروع Firebase |
 
 ## كيف بيقيس مستوى الطالب
 نفس فكرة **تصنيف Elo** اللي بيستخدمه الاتحاد الدولي للشطرنج: كل جواب هو «مباراة» بين الطالب والسؤال.
@@ -71,20 +69,19 @@ docs/       العقد المشترك وحالة المشروع
 
 | الطريقة | |
 |---|---|
-| **APK للأندرويد** | `flutter build apk --release` من `app/` للنسخة الحالية |
-| **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
+| **APK للأندرويد** | `flutter build apk --release --dart-define=LOCAL=true` من `app/` للنسخة الحالية |
+| **لوحة الإدارة** | الكود محفوظ؛ الخدمة المستضافة غير متاحة |
 | **من الكود** | Flutter 3.47 · JDK 17+ للأندرويد · Xcode للآيفون |
 
 ```bash
 git clone https://github.com/Salahianoo/masar.git
 cd masar/app
 flutter pub get
-flutter run                          # التطبيق الكامل مع Firebase (الديمو)
 flutter run --dart-define=LOCAL=true # بدون إنترنت: كل شي على الجهاز
 flutter test                         # 32 اختبار
 ```
 قاعدة بيانات مسار كانت مجهّزة بالمواد والأسئلة؛ الوضع المحلي ما يحتاج Firebase.
-**تنبيه:** مشروع Firebase الخاص بمسار رجّع خطأ فوترة 403 بتاريخ 2026-10-10؛ الوضع المحلي `LOCAL=true` شغّال، والوضع المتصل يحتاج إعادة تفعيل فوترة مسار. التفاصيل في [حالة الإزالة](docs/REMOVAL-2026-10-10.md).
+**تنبيه:** مالك المشروع حذف Firebase الخاص بمسار بعد المسابقة؛ الوضع المتصل ولوحة الإدارة المستضافة لم يعودا متاحين. خطأ 403 السابق سببه حذف المشروع، وليس الفوترة. التفاصيل في [حالة الإزالة](docs/REMOVAL-2026-10-10.md).
 
 العرض ونسخة APK السابقة من المسابقة محفوظان كأرشيف، وفيهما وصف المرشد الذي أُزيل بعد المسابقة. النسخة الحالية من التطبيق لا تتصل بجهاز هاشمي.
 

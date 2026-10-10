@@ -18,9 +18,8 @@ design/     App icon and brand assets
 docs/       This guide, the shared CONTRACT (data schema + engine maths), and removal status
 ```
 
-The default app targets Firebase project (`masar-hackathon-jo-2026-salah`), which was seeded with:
-5 subjects, 34 weighted concepts, 276 real past-exam questions, 9 exams. **You do not need your own Firebase
-project to run the app in local mode.** As of 2026-10-10, the Masar project returned billing-related 403 errors, so the hosted mode and admin dashboard may be unavailable until its billing is restored. The client config files (`app/lib/firebase_options.dart`,
+The original app targeted Firebase project (`masar-hackathon-jo-2026-salah`), which was seeded with:
+5 subjects, 34 weighted concepts, 276 real past-exam questions, 9 exams. The owner deleted that project after the contest. The hosted mode and admin dashboard are unavailable. **You do not need a Firebase project to run the app in local mode.** The client config files (`app/lib/firebase_options.dart`,
 `app/android/app/google-services.json`, `app/ios/Runner/GoogleService-Info.plist`) are committed for that reason.
 They are public client identifiers, not secrets.
 
@@ -30,13 +29,9 @@ They are public client identifiers, not secrets.
 
 The [v1.0.0 APK](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) is the contest snapshot and still includes the retired tutor. Build the current source with `flutter build apk --release` after installing the requirements below.
 
-## 2. Admin dashboard (no build needed)
+## 2. Historical admin dashboard
 
-**https://masar-hackathon-jo-2026-salah.web.app**
-
-It shows students, subjects, questions and live statistics. Every new sign-up in the app appears here in
-real time. **Judges:** sign in with `judges@masar-demo.com` / `12345678`. It is a read-only viewer
-(Firestore rules block every write for `admins/{uid}.role == "viewer"`), so you can open every page safely.
+The source is preserved in `admin/`, but its hosted service and Firebase data are unavailable because the Masar project was deleted. The former judges' account is no longer usable.
 
 ---
 
@@ -62,25 +57,16 @@ cd masar/app
 flutter pub get
 ```
 
-Then pick one of the two modes.
-
-**A) Full app on the live backend (default; this is the demo):**
-```bash
-flutter run                    # pick a connected phone, emulator or simulator
-```
-Registration, diagnostic, concept map, daily plan, practice, the خزنة exam bank and the admin dashboard
-all go through Firebase. An internet connection is required.
-
-**B) Offline mode, everything on the device (no backend, no internet):**
+Run the offline mode (the former default Firebase project was deleted):
 ```bash
 flutter run --dart-define=LOCAL=true
 ```
 Uses the same 276 bundled questions and the same learning engine on the device, with progress saved in
-SharedPreferences. Useful if the network at your venue is unreliable.
+SharedPreferences.
 
 ### Release builds
 ```bash
-flutter build apk --release            # → build/app/outputs/flutter-apk/app-release.apk
+flutter build apk --release --dart-define=LOCAL=true  # → build/app/outputs/flutter-apk/app-release.apk
 flutter build ios --simulator --debug  # → build/ios/iphonesimulator/Runner.app (drag onto a simulator)
 ```
 
@@ -150,15 +136,14 @@ npm test                             # learning-engine unit tests
 # Integration and rules tests need the Firebase emulators (Java 21+):
 #   firebase emulators:exec --only auth,firestore,functions "npm test"
 ```
-Deploying (team only): `firebase deploy --only functions,hosting,firestore:rules`.
+The former Masar Firebase project was deleted. Deployment requires a new project and configuration; these archived deploy commands do not apply to the current offline app.
 
-## 7. Admin dashboard locally (optional)
+## 7. Historical admin dashboard source (optional)
 
 ```bash
 cd admin
-cp .env.example .env.local       # public Firebase web config, already filled in
 npm ci
-npm run dev                      # → http://localhost:5173
+npm run build                    # verifies the archived source compiles
 ```
 
 ---
@@ -170,6 +155,6 @@ npm run dev                      # → http://localhost:5173
 | `flutter pub get` fails | Use Flutter 3.47+ (Dart 3.13+): `flutter upgrade`. |
 | Android build: "Unable to locate a Java Runtime" / wrong Java | Install JDK 17+, or point `JAVA_HOME` to Android Studio's JDK: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` |
 | iOS build: CocoaPods errors | `cd app/ios && pod install --repo-update`, then build again. |
-| Splash spins with no internet | The default mode needs the internet. Use `--dart-define=LOCAL=true` for offline. |
-| Admin shows «أضف إعدادات Firebase» | You skipped `cp .env.example .env.local` (local runs only). The hosted dashboard is already configured. |
+| Splash cannot connect to Firebase | The old Masar project was deleted. Use `--dart-define=LOCAL=true`. |
+| Admin shows «أضف إعدادات Firebase» | The old Firebase project was deleted. The dashboard source is archival. |
 | `analysis_options.yaml` shows as modified after a build | Flutter rewrites it. It's safe to ignore or `git checkout` it. |

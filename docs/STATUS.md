@@ -1,10 +1,10 @@
 # Current status — 2026-10-10
 
-Masar's AI tutor has been removed from the active Flutter app, backend source, admin UI, local dataset, and PC helper files. The app still supports sign-up, diagnostics, the concept map, daily plan, practice, Khazna question bank, and the admin dashboard.
+Masar's AI tutor has been removed from the active Flutter app, backend source, admin UI, local dataset, and PC helper files. The app still supports local sign-up, diagnostics, the concept map, daily plan, practice, and the Khazna question bank. The hosted admin dashboard is unavailable because the Masar Firebase project was deleted.
 
 ## Run
 
-See `docs/RUN.md`. Default mode uses Masar's Firebase project; `flutter run --dart-define=LOCAL=true` runs from the bundled five real exam papers. No home PC or local model is required.
+See `docs/RUN.md`. Run `flutter run --dart-define=LOCAL=true` using the bundled five real exam papers. The default Firebase mode no longer works. No home PC or local model is required.
 
 ## Checks
 
@@ -12,8 +12,8 @@ See `docs/RUN.md`. Default mode uses Masar's Firebase project; `flutter run --da
 - Flutter tests: 32 passing after removal.
 - Functions TypeScript build and engine tests: passing.
 - Admin TypeScript/Vite build: passing.
-- Updated admin Hosting: deployed. Offline Android APK: built at `~/Desktop/Masar-without-Rafeeq.apk`.
+- Updated admin Hosting was deployed before the project was deleted. An offline Android APK was built without Rafeeq.
 
 ## Cloud cleanup
 
-The Masar Firestore `config/app.mentorEnabled` flag was set to `false` and verified. Later deletion attempts for the retired `askMentor` function, its secret version, and the config document returned HTTP 403 because billing for the Masar project is disabled. No Khazna or Hashmi service was changed. Details and remaining steps: `docs/REMOVAL-2026-10-10.md`.
+The owner deleted the Masar Firebase project. The project is absent from the active Firebase project list; Khazna's separate project remains present. The 403 responses were incorrectly attributed to billing. No Khazna or Hashmi service was changed. The only remaining separation step is rotation of the old Hashmi gate token, which may be present in historical contest builds. See `docs/REMOVAL-2026-10-10.md`.

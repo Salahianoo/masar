@@ -56,4 +56,4 @@ mastery = round(100 / (1 + exp(-theta)))
 
 ## 8. Security and deployment
 
-Never commit credentials. The released contest build is historical and may contain a temporary token; rotate the Khazna gate token before relying on old build secrecy. The current source has no tutor client, URL, or token. See `docs/REMOVAL-2026-10-10.md` for the remaining cloud cleanup blocked by the Masar project's billing status.
+Never commit credentials. The released contest build is historical and may contain a temporary token; rotate the Khazna gate token before relying on old build secrecy. The current source has no tutor client, URL, or token. The owner deleted Masar's Firebase project; see `docs/REMOVAL-2026-10-10.md`.
