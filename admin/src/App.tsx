@@ -41,11 +41,12 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
   const [checking, setChecking] = useState(true)
   const [allowed, setAllowed] = useState(false)
+  const [viewer, setViewer] = useState(false)
   const [error, setError] = useState('')
   useEffect(() => onAuthStateChanged(auth, async next => {
     setChecking(true); setUser(next)
     if (next) {
-      try { setAllowed((await getDoc(doc(db, 'admins', next.uid))).exists()) }
+      try { const a = await getDoc(doc(db, 'admins', next.uid)); setAllowed(a.exists()); setViewer(a.get('role') === 'viewer') }
       catch { setAllowed(false); setError('تعذر التحقق من صلاحية الإدارة. تحقق من اتصال Firestore.') }
     } else setAllowed(false)
     setChecking(false)
@@ -54,7 +55,7 @@ function App() {
   if (checking) return <div className="loading">جارٍ التحقق من الحساب…</div>
   if (!user) return <Login error={error} setError={setError} />
   if (!allowed) return <div className="auth-page"><div className="auth-card"><h1>الحساب غير مخوّل</h1><p>يحتاج هذا الحساب إلى سجل admins/{user.uid} في مشروع مسار.</p>{error && <p className="error">{error}</p>}<button onClick={() => signOut(auth)}>تسجيل الخروج</button></div></div>
-  return <BrowserRouter><Dashboard /></BrowserRouter>
+  return <BrowserRouter>{viewer && <div className="viewer-banner">حساب عرض فقط للجنة التحكيم: بتقدر تشوف كل الصفحات، والتعديل مقفل.</div>}<Dashboard /></BrowserRouter>
 }
 function Login({ error, setError }: { error: string; setError: (value: string) => void }) {
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [busy, setBusy] = useState(false)

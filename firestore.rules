@@ -10,13 +10,20 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Viewer admins (e.g. the judges' demo account: admins/{uid}.role == "viewer")
+    // can read every admin page but change nothing.
+    function isEditor() {
+      return isAdmin() &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.get('role', 'owner') != 'viewer';
+    }
+
     function isOwner(uid) {
       return signedIn() && request.auth.uid == uid;
     }
 
     match /config/app {
       allow read: if signedIn();
-      allow create, update: if isAdmin();
+      allow create, update: if isEditor();
     }
 
     match /subjects/{subjectId} {
@@ -24,7 +31,7 @@ service cloud.firestore {
 
       match /concepts/{conceptId} {
         allow read: if signedIn();
-        allow update: if isAdmin() &&
+        allow update: if isEditor() &&
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['name', 'explanation', 'weight']) &&
           request.resource.data.name is string &&
@@ -42,7 +49,7 @@ service cloud.firestore {
 
     match /questions/{questionId} {
       allow read: if signedIn();
-      allow update: if isAdmin() &&
+      allow update: if isEditor() &&
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['flagged']) &&
         request.resource.data.flagged is bool;

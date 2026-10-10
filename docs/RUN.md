@@ -38,7 +38,8 @@ Install the APK we hand in with the submission (`Masar.apk`, about 80 MB) on any
 **https://masar-hackathon-jo-2026-salah.web.app**
 
 It shows students, subjects, questions and live statistics. Every new sign-up in the app appears here in
-real time. Sign-in is restricted to admin accounts. Ask the team for the demo admin login.
+real time. **Judges:** sign in with the demo account given in our submission form. It is a read-only viewer
+(Firestore rules block every write for `admins/{uid}.role == "viewer"`), so you can open every page safely.
 
 ---
 
