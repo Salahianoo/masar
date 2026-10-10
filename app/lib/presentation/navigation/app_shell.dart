@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:masar/presentation/state/providers.dart';
-import 'package:masar/presentation/components/mentor_avatar.dart';
 
-/// Bottom navigation with the 4 tabs: مساري · خزنة · {mentorName} · أنا.
+/// Bottom navigation with the 3 tabs: مساري · خزنة · أنا.
 /// The tabs also sit side by side in a pager, so a swipe moves between them;
 /// a tap on the bar (or any `go` to a tab) slides there the same way.
-class AppShell extends ConsumerStatefulWidget {
+class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.navigationShell, required this.children});
 
   final StatefulNavigationShell navigationShell;
@@ -17,10 +14,10 @@ class AppShell extends ConsumerStatefulWidget {
   final List<Widget> children;
 
   @override
-  ConsumerState<AppShell> createState() => _AppShellState();
+  State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> {
+class _AppShellState extends State<AppShell> {
   late final PageController _pages = PageController(initialPage: widget.navigationShell.currentIndex);
 
   /// True while the pager slides because of a tap, so the pages it passes on
@@ -66,7 +63,6 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final shell = widget.navigationShell;
-    final mentorName = ref.watch(configProvider).value?.mentorName ?? '';
     return Scaffold(
       body: NotificationListener<ScrollEndNotification>(
         // Whenever the pager comes to rest, the bar follows the page actually on
@@ -91,11 +87,6 @@ class _AppShellState extends ConsumerState<AppShell> {
           destinations: [
             const NavigationDestination(icon: Icon(Icons.route_outlined), label: 'مساري'),
             const NavigationDestination(icon: Icon(Icons.auto_stories_outlined), label: 'خزنة'),
-            NavigationDestination(
-              icon: const Opacity(opacity: .75, child: MentorBadge(size: 30)),
-              selectedIcon: const MentorBadge(size: 30, ring: true),
-              label: mentorName,
-            ),
             const NavigationDestination(icon: Icon(Icons.person_outline_rounded), label: 'أنا'),
           ],
         ),

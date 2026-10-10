@@ -86,7 +86,7 @@ void main() {
     expect(correctCard, hasLength(1));
   });
 
-  testWidgets('two wrong answers on one concept open the mentor intervention', (tester) async {
+  testWidgets('two wrong answers continue to the next question', (tester) async {
     await pumpPractice(tester, '/practice/first-aid?conceptId=wounds-bleeding');
 
     await answer(tester, correctly: false);
@@ -94,16 +94,10 @@ void main() {
     expect(tester.widgetList<OptionCard>(find.byType(OptionCard)).map((c) => c.state),
         containsAll([OptionState.wrong, OptionState.correct]));
     await tapNext(tester);
-    expect(find.textContaining('شكلك ملخبط'), findsNothing);
     expect(find.text('الجروح والنزيف · 2 من 8'), findsOneWidget);
 
     await answer(tester, correctly: false);
     await tapNext(tester);
-    expect(find.text('شكلك ملخبط شوي بـالجروح والنزيف. بدك أشرحلك بدقيقة؟'), findsOneWidget);
-
-    await tester.tap(find.text('لا، بكمل'));
-    await settle(tester);
-    expect(find.textContaining('شكلك ملخبط'), findsNothing);
     expect(find.text('الجروح والنزيف · 3 من 8'), findsOneWidget);
   });
 

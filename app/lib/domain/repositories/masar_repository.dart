@@ -8,7 +8,6 @@ abstract class MasarRepository {
   Future<void> signOut();
   Future<UserProfile?> currentProfile();
   Future<void> updateProfile(String displayName);
-  Future<AppConfig> config();
   Future<List<Subject>> subjects();
   Future<List<Concept>> concepts(String subjectId);
   Future<void> enroll(String subjectId, DateTime examDate);
@@ -22,7 +21,5 @@ abstract class MasarRepository {
                                      required int ms, required AnswerSource source});
   Future<List<Exam>> exams(String subjectId);
   Future<List<Question>> examQuestions(String examId);   // ordered by question order in the paper
-  Future<String> askMentor({required String subjectId, String? conceptId,
-                            required List<ChatMessage> messages});
   Future<List<ReadinessPoint>> readinessHistory(String subjectId);
 }

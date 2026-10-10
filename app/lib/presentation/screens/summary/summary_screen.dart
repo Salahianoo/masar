@@ -22,7 +22,8 @@ class SummaryScreen extends ConsumerWidget {
           ? Center(child: PrimaryButton(label: 'ارجع لخطتك',
               onPressed: () => context.go(AppRoutes.home)))
           : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const Center(child: MentorAvatar(pose: MentorPose.happy, size: 96)),
+              Center(child: Icon(Icons.check_circle_outline_rounded,
+                  size: 96, color: AppColors.accent)),
               const SizedBox(height: AppSpacing.lg),
               Text('هيك خلّصت جلستك!', style: AppText.title, textAlign: TextAlign.center),
               const SizedBox(height: AppSpacing.xl),

@@ -1,20 +1,5 @@
 import 'package:masar/core/utils/json_utils.dart';
 
-class AppConfig {
-  final String mentorName;
-  final bool mentorEnabled;
-
-  const AppConfig({required this.mentorName, required this.mentorEnabled});
-
-  factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
-        mentorName: json['mentorName'] as String? ?? '',
-        mentorEnabled: json['mentorEnabled'] as bool? ?? false,
-      );
-
-  Map<String, dynamic> toJson() =>
-      {'mentorName': mentorName, 'mentorEnabled': mentorEnabled};
-}
-
 class UserProfile {
   final String uid;
   final String displayName;

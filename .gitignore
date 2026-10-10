@@ -41,10 +41,10 @@ scripts/out/
 # Design secrets
 design/.env
 
-# PC mentor (رفيق)
+# Retired credentials: never commit any old local copies
 pc/.env
 pc/cloudflared.yml
 pc/logs/
 
-# TEMPORARY for the contest: رفيق through هاشمي's PC door. Delete after the contest.
+
 app/rafeeq.local.json

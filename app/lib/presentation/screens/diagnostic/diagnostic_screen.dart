@@ -179,8 +179,7 @@ class _DiagnosticScreenState extends ConsumerState<DiagnosticScreen> {
       padding: const EdgeInsets.all(AppSpacing.screen),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Spacer(),
-        Center(child: MentorAvatar(
-          pose: good ? MentorPose.happy : mid ? MentorPose.pointing : MentorPose.thinking, size: 150)),
+        Center(child: Icon(Icons.insights_rounded, size: 112, color: AppColors.accent)),
         const SizedBox(height: AppSpacing.xl),
         Text('نتيجة التشخيص', style: AppText.heading, textAlign: TextAlign.center),
         const SizedBox(height: AppSpacing.sm),

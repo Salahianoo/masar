@@ -8,7 +8,7 @@ import 'package:masar/domain/repositories/google_account_service.dart';
 import 'package:masar/domain/repositories/masar_repository.dart';
 
 /// `--dart-define=LOCAL=true` (or the older `MOCK=true`) → the five real demo
-/// papers on the device, رفيق on the team PC. Otherwise → Firebase.
+/// papers on the device. Otherwise → Firebase.
 const bool kUseLocal = bool.fromEnvironment('LOCAL') || bool.fromEnvironment('MOCK');
 
 /// The only way screens reach data. Never call Firebase directly.

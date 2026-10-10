@@ -3,11 +3,10 @@ import {getFirestore, Timestamp, type DocumentData} from "firebase-admin/firesto
 import {setGlobalOptions} from "firebase-functions/v2";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {
-  buildPlan, mastery, nudge, pickDiagnostic, pickNextQuestion, projectedReadiness,
+  buildPlan, mastery, pickDiagnostic, pickNextQuestion, projectedReadiness,
   readiness, status, updateAbility, updateDifficulty,
   type CandidateQuestion, type ConceptState, type WeightedConcept,
 } from "./engine";
-export {askMentor} from "./mentor";
 
 initializeApp();
 const db = getFirestore();
@@ -76,8 +75,6 @@ const baseStats = (data: DocumentData | undefined) => ({
   newUsers: Number(data?.newUsers ?? 0), activeUsers: Number(data?.activeUsers ?? 0),
   answers: Number(data?.answers ?? 0), correct: Number(data?.correct ?? 0),
   diagnosticsCompleted: Number(data?.diagnosticsCompleted ?? 0),
-  mentorMessages: Number(data?.mentorMessages ?? 0),
-  mentorBySource: {pc: Number(data?.mentorBySource?.pc ?? 0), cloud: Number(data?.mentorBySource?.cloud ?? 0)},
 });
 const requiredSubject = async (subjectId: string) => {
   const doc = await db.doc(`subjects/${subjectId}`).get();
@@ -360,11 +357,7 @@ export const submitAnswer = onCall(async (request) => {
       return {conceptId: id, name: concept.name, weight: concept.weight,
         mastery: value, attempts: state.attempts, status: status(state.attempts, value)};
     });
-    const nudged = !isCorrect ? conceptIds.map((id) => ({id, message: nudge(states[id].recent,
-      weighted.find((item) => item.id === id)?.name ?? "المفهوم")})).find((item) => item.message) : undefined;
     return {correct: isCorrect, correctAnswer, readiness: newReadiness,
-      readinessDelta: newReadiness - beforeReadiness, updated,
-      nudge: nudged ? {conceptId: nudged.id,
-        conceptName: weighted.find((item) => item.id === nudged.id)?.name ?? "", message: nudged.message} : null};
+      readinessDelta: newReadiness - beforeReadiness, updated};
   });
 });

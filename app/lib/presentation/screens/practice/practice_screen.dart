@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:masar/presentation/state/providers.dart' show todayPlanProvider;
-import 'package:masar/presentation/navigation/routes.dart';
-import 'package:masar/presentation/screens/mentor/mentor_intervention_sheet.dart';
 import 'package:masar/presentation/screens/practice/practice_core.dart';
 import 'package:masar/presentation/screens/practice/practice_args.dart';
 import 'package:masar/presentation/screens/practice/practice_session.dart';
@@ -112,16 +110,6 @@ class _PracticeScreenState extends ConsumerState<PracticeScreen> {
     if (result == null || _advancing) return;
     setState(() => _advancing = true);
     try {
-      final nudge = result.nudge;
-      if (nudge != null) {
-        final action = await showMentorIntervention(context, nudge: nudge);
-        if (!mounted) return;
-        if (action == MentorInterventionOutcome.openMentor) {
-          await context.push(AppRoutes.mentorChat(widget.args.subjectId,
-            conceptId: nudge.conceptId));
-          if (!mounted) return;
-        }
-      }
       final q = await _prefetch;
       if (!mounted) return;
       if (q == null) {

@@ -3,7 +3,6 @@ import 'package:masar/domain/services/learning_engine.dart';
 import 'package:masar/data/datasources/local/local_data.g.dart';
 import 'package:masar/data/repositories/local_masar_repository.dart';
 import 'package:masar/data/datasources/local/session_store.dart';
-import 'package:masar/data/datasources/remote/rafeeq_client.dart';
 import 'package:masar/domain/entities/entities.dart';
 
 void main() {
@@ -61,12 +60,10 @@ void main() {
 
   group('LocalMasarRepository (the five real papers)', () {
     late LocalMasarRepository repo;
-    late _FakeRafeeq rafeeq;
     const subject = 'first-aid';
 
     setUp(() async {
-      rafeeq = _FakeRafeeq();
-      repo = LocalMasarRepository(rafeeq: rafeeq);
+      repo = LocalMasarRepository();
       await repo.signIn();
       await repo.updateProfile('سارة');
       await repo.enroll(subject, DateTime.now().add(const Duration(days: 7)));
@@ -128,7 +125,7 @@ void main() {
       expect(p.projectedReadiness, LearningEngine.projectedReadiness(p.readiness, 7));
     });
 
-    test('correct answer raises readiness; two wrong in a row bring a nudge', () async {
+    test('correct answer raises readiness and later mistakes are recorded', () async {
       final bank = buildLocalQuestions()
           .where((q) => !q.flagged && q.question.primaryConceptId == 'wounds-bleeding');
       final right = bank.first;
@@ -136,7 +133,6 @@ void main() {
           questionId: right.question.id, chosen: right.answer, ms: 1, source: AnswerSource.plan);
       expect(r1.correct, isTrue);
       expect(r1.readinessDelta, greaterThan(0));
-      expect(r1.nudge, isNull);
 
       AnswerResult? last;
       for (final q in bank.skip(1).take(2)) {
@@ -144,7 +140,6 @@ void main() {
             questionId: q.question.id, chosen: 'غلط', ms: 1, source: AnswerSource.plan);
       }
       expect(last!.correct, isFalse);
-      expect(last.nudge?.conceptId, 'wounds-bleeding');
     });
 
     test('plan: top 3 by priority, 15 questions, done counts go up', () async {
@@ -173,36 +168,9 @@ void main() {
       await sub.cancel();
     });
 
-    test('askMentor sends رفيق the persona, the inferred concept and real answers', () async {
-      final reply = await repo.askMentor(
-        subjectId: subject,
-        messages: const [ChatMessage(role: 'user', text: 'ما فهمت شو الفرق بين النزيف الداخلي والخارجي')],
-      );
-      expect(reply, 'رد رفيق');
-      final system = rafeeq.lastSystem!;
-      expect(system, contains('إنت رفيق'));
-      expect(system, contains('ثقافة صحية و اسعافات أولية'));
-      expect(system, contains('المفهوم: الجروح والنزيف'));
-      expect(system, contains('الجواب الصحيح:'));
-      expect(system, isNot(contains('{grounding}')));
-      expect(rafeeq.lastHistory!.single.role, 'user');
-
-      await repo.askMentor(subjectId: subject, messages: const [ChatMessage(role: 'user', text: 'مرحبا')]);
-      expect(rafeeq.lastSystem, contains('مفاهيم المادة:'));
-    });
-
-    test('askMentor explains when the PC connection is not configured', () async {
-      final offline = LocalMasarRepository(rafeeq: RafeeqClient(url: '', token: ''));
-      await offline.signIn();
-      expect(
-        () => offline.askMentor(subjectId: subject, messages: const [ChatMessage(role: 'user', text: 'مرحبا')]),
-        throwsA(isA<LocalRepositoryException>().having((e) => e.message, 'message', contains('مش موصول بالكمبيوتر'))),
-      );
-    });
-
     test('session survives a restart: name, subjects, mastery, history, plan', () async {
       final store = MemorySessionStore();
-      final first = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      final first = LocalMasarRepository(store: store);
       await first.signIn();
       await first.updateProfile('سارة');
       await first.enroll(subject, DateTime.now().add(const Duration(days: 7)));
@@ -214,7 +182,7 @@ void main() {
       final before = await first.completeDiagnostic(subject);
       final plan = await first.todayPlan(subject);
 
-      final second = LocalMasarRepository(rafeeq: rafeeq, store: store); // the app relaunched
+      final second = LocalMasarRepository(store: store); // the app relaunched
       await second.signIn();
       expect((await second.currentProfile())?.displayName, 'سارة');
       expect((await second.enrollments()).map((e) => e.subjectId), [subject, 'databases']);
@@ -228,14 +196,14 @@ void main() {
 
     test('signOut forgets the student on this device', () async {
       final store = MemorySessionStore();
-      final repo = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      final repo = LocalMasarRepository(store: store);
       await repo.signIn();
       await repo.updateProfile('سارة');
       await repo.enroll(subject, DateTime.now().add(const Duration(days: 7)));
       await repo.signOut();
       expect(await store.load(), isNull);
 
-      final relaunched = LocalMasarRepository(rafeeq: rafeeq, store: store);
+      final relaunched = LocalMasarRepository(store: store);
       await relaunched.signIn();
       expect(await relaunched.currentProfile(), isNull);
       expect(await relaunched.enrollments(), isEmpty);
@@ -257,17 +225,4 @@ void main() {
       expect(qs.first.id, 'aid-mid-0-0');
     });
   });
-}
-
-class _FakeRafeeq extends RafeeqClient {
-  _FakeRafeeq() : super(url: 'http://test', token: 'test');
-  String? lastSystem;
-  List<({String role, String text})>? lastHistory;
-
-  @override
-  Future<String> chat({required String system, required List<({String role, String text})> history}) async {
-    lastSystem = system;
-    lastHistory = history;
-    return 'رد رفيق';
-  }
 }

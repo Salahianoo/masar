@@ -3,8 +3,7 @@
 Everything you need to install, build, run and test Masar. It is written for someone who has never seen the
 project. If something here doesn't work, the **Troubleshooting** section at the end covers the usual causes.
 
-> **Fastest way to see it:** install the Android APK (§1) or open the admin dashboard (§2). Building from
-> source (§3) takes about 10 minutes the first time.
+> **Current version:** build from source (§3). The old v1.0.0 APK is a historical contest build.
 
 ---
 
@@ -12,26 +11,24 @@ project. If something here doesn't work, the **Troubleshooting** section at the 
 
 ```
 app/        Flutter mobile app (iOS + Android), the part students use
-functions/  Firebase Cloud Functions (TypeScript): learning engine, daily plan, رفيق mentor
+functions/  Firebase Cloud Functions (TypeScript): learning engine and daily plan
 admin/      Admin dashboard (React + Vite), hosted on Firebase Hosting
 scripts/    Data pipeline: the 5 subjects' exam papers → questions + concepts → app dataset / Firestore
-design/     App icon and رفيق mentor images
-docs/       This guide, the shared CONTRACT (data schema + engine maths), the mentor persona
-pc/         Optional: رفيق's own gateway for running the model on a team PC
+design/     App icon and brand assets
+docs/       This guide, the shared CONTRACT (data schema + engine maths), and removal status
 ```
 
-The app talks to a live Firebase project (`masar-hackathon-jo-2026-salah`) that is already set up and seeded:
+The default app targets Firebase project (`masar-hackathon-jo-2026-salah`), which was seeded with:
 5 subjects, 34 weighted concepts, 276 real past-exam questions, 9 exams. **You do not need your own Firebase
-project to run the app.** The client config files (`app/lib/firebase_options.dart`,
+project to run the app in local mode.** As of 2026-10-10, the Masar project returned billing-related 403 errors, so the hosted mode and admin dashboard may be unavailable until its billing is restored. The client config files (`app/lib/firebase_options.dart`,
 `app/android/app/google-services.json`, `app/ios/Runner/GoogleService-Info.plist`) are committed for that reason.
 They are public client identifiers, not secrets.
 
 ---
 
-## 1. Android APK (no build needed)
+## 1. Historical Android APK
 
-Download **[Masar.apk from Release v1.0.0](https://github.com/Salahianoo/masar/releases/tag/v1.0.0)** (about 80 MB) and install it on any Android 7.0+ phone. Allow
-"install from unknown sources" when asked. It is signed with a debug key, so uninstall any older Masar build first.
+The [v1.0.0 APK](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) is the contest snapshot and still includes the retired tutor. Build the current source with `flutter build apk --release` after installing the requirements below.
 
 ## 2. Admin dashboard (no build needed)
 
@@ -71,7 +68,7 @@ Then pick one of the two modes.
 ```bash
 flutter run                    # pick a connected phone, emulator or simulator
 ```
-Registration, diagnostic, concept map, daily plan, practice, the خزنة exam bank, رفيق and the admin dashboard
+Registration, diagnostic, concept map, daily plan, practice, the خزنة exam bank and the admin dashboard
 all go through Firebase. An internet connection is required.
 
 **B) Offline mode, everything on the device (no backend, no internet):**
@@ -79,7 +76,7 @@ all go through Firebase. An internet connection is required.
 flutter run --dart-define=LOCAL=true
 ```
 Uses the same 276 bundled questions and the same learning engine on the device, with progress saved in
-SharedPreferences. Useful if the network at your venue is unreliable. In this mode رفيق is not connected.
+SharedPreferences. Useful if the network at your venue is unreliable.
 
 ### Release builds
 ```bash
@@ -106,10 +103,8 @@ flutter test      # expect: 39 tests, all pass
    appears in real past exams.
 6. **Home:** swipe between subject cards (readiness ring); «خطة اليوم» lists today's questions. Swipe between
    the four tabs, or tap the bottom bar.
-7. **Practice:** answer two questions wrong on the same concept, and رفيق offers to explain.
-8. **رفيق tab:** ask anything about the subject. He answers in Jordanian Arabic, grounded in the real exam
-   questions.
-9. **أنا → «كيف بنقيس مستواك؟»:** how the rating works, with a live simulator that runs the real engine.
+7. **Practice:** answer questions from the daily plan and watch your mastery change.
+8. **أنا → «كيف بنقيس مستواك؟»:** how the rating works, with a live simulator that runs the real engine.
 
 ---
 
@@ -129,14 +124,6 @@ daily plan:  the 3 concepts with the highest weight × (1 − mastery), 12–15 
 ```
 The same maths runs on the server (`functions/src/engine.ts`) and in the app
 (`app/lib/domain/services/learning_engine.dart`). Full spec: `docs/CONTRACT.md` §7.
-
-### رفيق (the mentor)
-- Cloud Function `askMentor` builds the prompt from the persona (`docs/mentor-persona.md`), the concept's
-  explanation, up to 6 real questions with their source answers, and the student's mastery.
-- The model is a **local LLM** (Qwen 3.5 9B in LM Studio) on the team's PC, reached through an
-  authenticated tunnel. The URL and token are Firebase secrets, never in the app or the repo.
-- **If the team PC is offline, رفيق replies that he's busy, and everything else keeps working.**
-- Students get a per-day message limit, enforced server-side.
 
 ### Data
 `scripts/data/masar-5/` holds the 5 reviewed papers (JSON) plus `concepts.json` (34 concepts with
@@ -159,7 +146,7 @@ app/lib/presentation/  screens, components, navigation, theme (Tajawal font, nav
 cd functions
 npm ci
 npm run build                        # TypeScript → lib/
-npx vitest run src                   # 11 unit tests (engine + mentor)
+npm test                             # learning-engine unit tests
 # Integration and rules tests need the Firebase emulators (Java 21+):
 #   firebase emulators:exec --only auth,firestore,functions "npm test"
 ```
@@ -183,7 +170,6 @@ npm run dev                      # → http://localhost:5173
 | `flutter pub get` fails | Use Flutter 3.47+ (Dart 3.13+): `flutter upgrade`. |
 | Android build: "Unable to locate a Java Runtime" / wrong Java | Install JDK 17+, or point `JAVA_HOME` to Android Studio's JDK: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` |
 | iOS build: CocoaPods errors | `cd app/ios && pod install --repo-update`, then build again. |
-| رفيق says «مشغول» (busy) | The team PC running the model is offline. Everything else works. Contact the team. |
 | Splash spins with no internet | The default mode needs the internet. Use `--dart-define=LOCAL=true` for offline. |
 | Admin shows «أضف إعدادات Firebase» | You skipped `cp .env.example .env.local` (local runs only). The hosted dashboard is already configured. |
 | `analysis_options.yaml` shows as modified after a build | Flutter rewrites it. It's safe to ignore or `git checkout` it. |

@@ -8,10 +8,6 @@ export 'package:masar/core/di/repository_provider.dart';
 // Shared read providers. After a write (enroll, updateProfile, an answer…)
 // call `ref.invalidate(...)` on the ones that changed. `progressProvider` is live.
 
-final configProvider = FutureProvider<AppConfig>(
-  (ref) => ref.watch(masarRepositoryProvider).config(),
-);
-
 final profileProvider = FutureProvider<UserProfile?>(
   (ref) => ref.watch(masarRepositoryProvider).currentProfile(),
 );

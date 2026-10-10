@@ -11,7 +11,7 @@ import 'package:masar/presentation/navigation/router.dart';
 import 'package:masar/presentation/themes/app_theme.dart';
 import 'package:masar/presentation/components/widgets.dart';
 
-/// Ways رفيق says hello. One is picked per app launch, so it changes every
+/// A greeting is picked per app launch, so it changes every
 /// time the app opens but stays put while it's open.
 const _greetings = [
   'أهلاً يا {name}',
@@ -108,15 +108,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _noSubjectYet(String name) => ListView(
     padding: const EdgeInsets.all(AppSpacing.screen),
     children: [
-      Row(
-        children: [
-          const _MentorShortcut(),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: Text(greetingFor(name), style: AppText.title)),
-        ],
-      ),
+      Text(greetingFor(name), style: AppText.title),
       const SizedBox(height: AppSpacing.xxl),
-      const Center(child: MentorAvatar(pose: MentorPose.pointing, size: 160)),
+      Center(child: Icon(Icons.auto_stories_rounded, size: 112, color: AppColors.accent)),
       const SizedBox(height: AppSpacing.lg),
       Text(
         'خلّينا نبلّش بمادة',
@@ -148,13 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screen),
       children: [
-        Row(
-          children: [
-            const _MentorShortcut(),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(child: Text(greetingFor(name), style: AppText.title)),
-          ],
-        ),
+        Text(greetingFor(name), style: AppText.title),
         const SizedBox(height: AppSpacing.lg),
         // Swipe between your subjects; the last card adds another.
         _SubjectDeck(
@@ -658,40 +646,6 @@ class _AddSubjectCard extends StatelessWidget {
               Text('جهّز حالك لامتحان ثاني', style: AppText.caption),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// رفيق waving in the header; a tap slides over to his tab.
-class _MentorShortcut extends StatefulWidget {
-  const _MentorShortcut();
-
-  @override
-  State<_MentorShortcut> createState() => _MentorShortcutState();
-}
-
-class _MentorShortcutState extends State<_MentorShortcut> {
-  bool _down = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'احكي مع رفيق',
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _down = true),
-        onTapCancel: () => setState(() => _down = false),
-        onTapUp: (_) {
-          setState(() => _down = false);
-          HapticFeedback.lightImpact();
-          context.go(AppRoutes.mentor);
-        },
-        child: AnimatedScale(
-          scale: _down ? .88 : 1,
-          duration: const Duration(milliseconds: 120),
-          child: const MentorAvatar(pose: MentorPose.wave, size: 52),
         ),
       ),
     );

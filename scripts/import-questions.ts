@@ -25,7 +25,7 @@ type ImportQuestion = {
 type ImportExam = {id: string; subjectId: string; label: string; pdfUrl: string; questionCount: number; order: number};
 type ConceptSource = {id: string; name: string; questions: string[]; explanation: string};
 type ConceptFile = {
-  subjects: Record<string, {name: string; file: string; concepts: ConceptSource[]; mentorNotes?: string}>;
+  subjects: Record<string, {name: string; file: string; concepts: ConceptSource[]}>;
   suspect: Record<string, Record<string, string>>;
 };
 type ImportConcept = {id: string; name: string; weight: number; explanation: string; order: number;
@@ -104,7 +104,7 @@ async function collect(sourceDir: string, subjects: Set<string>) {
     pilotFiles.has(file) && !file.startsWith("bench-") && file !== "test.json" &&
     !file.includes("DRAFT")).sort();
   const bySubject = new Map<string, {name: string; exams: ImportExam[]; questions: ImportQuestion[];
-    concepts: ImportConcept[]; mentorNotes: string; skipped: number}>();
+    concepts: ImportConcept[]; skipped: number}>();
   for (const file of files) {
     const source = JSON.parse(await readFile(join(sourceDir, file), "utf8")) as SourceFile;
     const name = String(source.subjectName ?? "");
@@ -119,8 +119,7 @@ async function collect(sourceDir: string, subjects: Set<string>) {
       conceptOf.set(key, [...(conceptOf.get(key) ?? []), concept.id]);
     }
     const suspect = conceptFile.suspect[sourceConcepts.file] ?? {};
-    const group = bySubject.get(subjectId) ?? {name, exams: [], questions: [], concepts: [],
-      mentorNotes: sourceConcepts.mentorNotes ?? "", skipped: 0};
+    const group = bySubject.get(subjectId) ?? {name, exams: [], questions: [], concepts: [], skipped: 0};
     bySubject.set(subjectId, group);
     const sections = Array.isArray(source.sections) ? source.sections : [];
     for (const [sectionIndex, section] of sections.entries()) {
@@ -176,7 +175,7 @@ async function main() {
   for (const [id, group] of groups) {
     const writes = [];
     const subjectFields = {name: group.name, questionCount: group.questions.filter((q) => !q.flagged).length,
-      conceptCount: group.concepts.length, active: true, mentorNotes: group.mentorNotes};
+      conceptCount: group.concepts.length, active: true};
     writes.push(putDoc(`subjects/${id}`, subjectFields));
     for (const concept of group.concepts) {
       const path = `subjects/${id}/concepts/${concept.id}`;

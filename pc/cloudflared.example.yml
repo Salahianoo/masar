@@ -1,9 +1,0 @@
-# Copy to pc\cloudflared.yml on the PC and fill in the tunnel id from
-# `cloudflared tunnel create masar`. This is Masar's own tunnel: هاشمي's
-# tunnel and config are never touched.
-tunnel: <MASAR_TUNNEL_ID>
-credentials-file: C:\Users\<you>\.cloudflared\<MASAR_TUNNEL_ID>.json
-ingress:
-  - hostname: rafeeq.salahabushamseih.com
-    service: http://127.0.0.1:8788
-  - service: http_status:404

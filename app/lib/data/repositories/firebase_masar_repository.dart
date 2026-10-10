@@ -91,13 +91,6 @@ class FirebaseMasarRepository implements MasarRepository {
   }
 
   @override
-  Future<AppConfig> config() async {
-    final doc = await _db.doc('config/app').get();
-    if (!doc.exists) throw StateError('إعدادات التطبيق غير متاحة حالياً');
-    return AppConfig.fromJson(doc.data()!);
-  }
-
-  @override
   Future<List<Subject>> subjects() async {
     final docs = await _db.collection('subjects').where('active', isEqualTo: true).get();
     return docs.docs.map((d) => Subject.fromJson({'id': d.id, ...d.data()})).toList();
@@ -226,20 +219,6 @@ class FirebaseMasarRepository implements MasarRepository {
     final docs = await _db.collection('questions').where('examId', isEqualTo: examId).get();
     // Awaiting the contract's paper-order field before this list is sorted.
     return docs.docs.map((d) => Question.fromJson({'id': d.id, ...d.data()})).toList();
-  }
-
-  @override
-  Future<String> askMentor({
-    required String subjectId,
-    String? conceptId,
-    required List<ChatMessage> messages,
-  }) async {
-    final data = await _call('askMentor', {
-      'subjectId': subjectId,
-      'conceptId': ?conceptId,
-      'messages': messages.map((message) => message.toJson()).toList(),
-    });
-    return data['reply'] as String;
   }
 
   @override

@@ -18,8 +18,6 @@ abstract final class LearningEngine {
   static const planConcepts = 3;
   static const minPerConcept = 2;
 
-  static String nudgeMessage(String conceptName) =>
-      'شكلك ملخبط شوي بـ$conceptName. بدك أشرحلك بدقيقة؟';
 
   /// p = 1 / (1 + exp(-(theta - b)))
   static double pCorrect(double theta, double b) => 1 / (1 + math.exp(-(theta - b)));

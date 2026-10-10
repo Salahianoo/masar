@@ -6,7 +6,6 @@ import 'package:masar/presentation/screens/diagnostic/diagnostic_screen.dart';
 import 'package:masar/presentation/screens/home/home_screen.dart';
 import 'package:masar/presentation/screens/intro/intro_screen.dart';
 import 'package:masar/presentation/screens/map/map_screen.dart';
-import 'package:masar/presentation/screens/mentor/mentor_screen.dart';
 import 'package:masar/presentation/screens/khazna/khazna_screen.dart';
 import 'package:masar/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:masar/presentation/screens/profile/profile_screen.dart';
@@ -90,12 +89,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) =>
             _animated(state, KhaznaExamScreen(examId: state.pathParameters['examId']!)),
       ),
-      GoRoute(path: '/mentor/:subjectId', pageBuilder: (context, state) => _animated(state, MentorScreen(
-        subjectId: state.pathParameters['subjectId']!,
-        conceptId: state.uri.queryParameters['conceptId'],
-      ))),
-
-      // ── the 4 tabs ──
+      // ── the 3 tabs ──
       StatefulShellRoute(
         pageBuilder: (context, state, navigationShell) => CustomTransitionPage<void>(
           child: navigationShell,
@@ -113,10 +107,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.khazna,
               builder: (context, state) => const KhaznaScreen()),
-          ]),
-          StatefulShellBranch(preload: true, routes: [
-            GoRoute(path: AppRoutes.mentor,
-              builder: (context, state) => const MentorScreen()),
           ]),
           StatefulShellBranch(preload: true, routes: [
             GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),

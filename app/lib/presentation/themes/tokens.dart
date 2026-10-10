@@ -43,7 +43,7 @@ class AppPalette {
   /// Navy for brand headings; a light navy on dark backgrounds.
   final Color brand;
 
-  /// Teal: icons, highlights, رفيق.
+  /// Teal: icons and highlights.
   final Color accent;
   final Color accentSoft;
 
@@ -173,9 +173,6 @@ abstract final class AppColors {
   static Color get errorSoft => _p.errorSoft;
   static Color get warning => _p.warning;
 
-  /// رفيق's colors.
-  static Color get mentor => _p.accent;
-  static Color get mentorSoft => _p.accentSoft;
 }
 
 abstract final class AppSpacing {
@@ -203,7 +200,6 @@ abstract final class AppSizes {
   static const minTapTarget = 48.0;
   static const barHeight = 8.0;
   static const optionMinHeight = 56.0;
-  static const mentorAvatar = 48.0;
 }
 
 abstract final class AppDurations {

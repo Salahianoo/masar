@@ -4,7 +4,7 @@ typedef AnswerConceptState = ({
   double theta, int attempts, int correct, DateTime? lastSeen, List<bool> recent,
 });
 typedef AppliedAnswer = ({
-  double difficulty, Map<String, AnswerConceptState> states, bool nudge,
+  double difficulty, Map<String, AnswerConceptState> states,
 });
 
 /// Applies one answer to the question and its primary/secondary concepts.
@@ -35,8 +35,6 @@ abstract final class ApplyAnswerUseCase {
           state.recent.length >= 3 ? state.recent.length - 2 : 0).toList(),
       );
     }
-    final recent = changed[conceptIds.first]?.recent ?? primary.recent;
-    return (difficulty: nextDifficulty, states: changed,
-      nudge: recent.length >= 2 && !recent[recent.length - 1] && !recent[recent.length - 2]);
+    return (difficulty: nextDifficulty, states: changed);
   }
 }

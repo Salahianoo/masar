@@ -1,10 +1,10 @@
 {
-  "_about": "Concepts and رفيق's explanations for the five demo papers, written by hand from the papers' own questions and answers (2026-10-09). Question keys are '<section>.<position>' in each paper's JSON, the same position the importer uses. A question's first concept is its primary one. Weights are not stored here: the importer computes them from how many questions each concept owns. 'suspect' lists questions whose source answer looks wrong; they are imported with flagged=true and are never used in an explanation. Answers are never changed here.",
+  "_about": "Concepts and study explanations for the five exam papers, written by hand from the papers' own questions and answers (2026-10-09). Question keys are '<section>.<position>' in each paper's JSON, the same position the importer uses. A question's first concept is its primary one. Weights are not stored here: the importer computes them from how many questions each concept owns. 'suspect' lists questions whose source answer looks wrong; they are imported with flagged=true and are never used in practice. Answers are never changed here.",
   "subjects": {
     "computer-ethics": {
       "name": "اخلاقيات حاسوب",
       "file": "ethics-mid",
-      "mentorNotes": "المصطلحات الإنجليزية (أسماء النظريات، طبقات TCP/IP، أنواع الهجمات) بتضل بالإنجليزي زي ما بتيجي بالامتحان، ومعها معناها بالعربي.",
+
       "concepts": [
         {
           "id": "ethical-theories",
@@ -87,7 +87,7 @@
     "environment": {
       "name": "التنمية و البيئة",
       "file": "env-mid",
-      "mentorNotes": "المادة فيها سنوات ونسب كثير (مؤتمرات، بروتوكولات، أرقام المياه بالأردن). لما الطالب يسأل عن رقم، أعطيه الرقم زي ما هو بالمادة ومعه حيلة صغيرة للحفظ.",
+
       "concepts": [
         {
           "id": "environment-basics",
@@ -285,7 +285,7 @@
     "first-aid": {
       "name": "ثقافة صحية و اسعافات أولية",
       "file": "aid-mid",
-      "mentorNotes": "كثير من أجوبة المادة «جميع ما ذكر» أو «أ + ب». علّم الطالب يقرأ كل الخيارات قبل ما يختار. ولما يسأل عن إجراء إسعافي، احكيله الخطوات بالترتيب.",
+
       "concepts": [
         {
           "id": "cpr",
@@ -398,7 +398,7 @@
     "databases": {
       "name": "مقدمة في نظم قواعد البيانات",
       "file": "database-final",
-      "mentorNotes": "الأوامر وأسماء الجداول بتنكتب بالإنجليزي بسطر لحالها، والشرح بالعربي. في سؤال التطبيع، اطلب من الطالب يكتب الـ FDs قبل ما يقرر الصيغة الطبيعية.",
+
       "concepts": [
         {
           "id": "sql-queries",
@@ -466,7 +466,7 @@
     "military-science": {
       "name": "علوم عسكرية",
       "file": "military-mid",
-      "mentorNotes": "المادة تواريخ وأسماء وأحداث. رتّب للطالب الأحداث على خط زمني، واحكيله القصة مش قائمة، لأنه هيك بتنحفظ أسرع.",
+
       "concepts": [
         {
           "id": "jordanian-state",

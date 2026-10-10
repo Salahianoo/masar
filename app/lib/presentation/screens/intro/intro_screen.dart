@@ -15,19 +15,19 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _Slide {
-  const _Slide(this.pose, this.title, this.body);
-  final MentorPose pose;
+  const _Slide(this.icon, this.title, this.body);
+  final IconData icon;
   final String title;
   final String body;
 }
 
 const _slides = [
-  _Slide(MentorPose.wave, 'اعرف وين واقف',
+  _Slide(Icons.query_stats_rounded, 'اعرف وين واقف',
       '8 أسئلة قصيرة من امتحانات سابقة حقيقية، وبتطلعلك خريطة بكل مفهوم بالمادة ونسبة جاهزيتك للامتحان.'),
-  _Slide(MentorPose.pointing, 'خطة يومية على قدّ وقتك',
+  _Slide(Icons.route_rounded, 'خطة يومية على قدّ وقتك',
       'كل يوم بنختارلك أسئلة على المفاهيم الضعيفة عندك، وبنقدّم اللي بيتكرر أكثر بالامتحانات.'),
-  _Slide(MentorPose.happy, 'رفيق معك بكل خطوة',
-      'إذا غلطت مرتين بنفس المفهوم، رفيق بيشرحلك بلهجتنا. وبنك خزنة للامتحانات السابقة جوّا التطبيق.'),
+  _Slide(Icons.auto_stories_rounded, 'امتحانات السنوات بين إيديك',
+      'بتقدر ترجع لأسئلة امتحانات حقيقية من بنك خزنة، وتتمرّن على المفاهيم اللي بتحتاجها.'),
 ];
 
 class _IntroScreenState extends State<IntroScreen> {
@@ -115,7 +115,7 @@ class _SlideView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          MentorAvatar(pose: slide.pose, size: 200),
+          Icon(slide.icon, size: 120, color: AppColors.accent),
           const SizedBox(height: AppSpacing.xxl),
           Text(slide.title, style: AppText.title, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.md),

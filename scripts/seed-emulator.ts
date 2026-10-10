@@ -13,9 +13,6 @@ const subjectId = "first-aid";
 const concepts = ["النزيف", "الكسور", "الإنعاش القلبي", "الضغط النفسي",
   "الحروق", "الاختناق", "الجروح", "الإغماء"];
 
-batch.set(db.doc("config/app"), {
-  mentorName: "رفيق", mentorEnabled: true, mentorSource: "cloud", dailyMentorLimit: 30,
-});
 batch.set(db.doc(`subjects/${subjectId}`), {
   name: "ثقافة صحية و اسعافات أولية", questionCount: 24, conceptCount: 8, active: true,
 });

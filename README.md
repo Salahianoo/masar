@@ -1,21 +1,21 @@
 # مسار · Masar
 
 **تطبيق تعلّم تكيّفي لطلاب الجامعات بالأردن.** بيعرف وين الطالب واقف بكل مفهوم، وبيبنيله خطة يومية
-على نقاط ضعفه، مرتبة حسب قديش كل مفهوم بيتكرر بالامتحانات الحقيقية، ومعه مرشد اسمه **رفيق** بيشرحله بلهجتنا.
+على نقاط ضعفه، مرتبة حسب قديش كل مفهوم بيتكرر بالامتحانات الحقيقية.
 
 > JORDAN.NEXT() · Smart Society & Public Services · **Education & learning**
 > *"Students learn at different paces with uneven access to support."*
 
 *An adaptive learning app for Jordanian university students. A short diagnostic builds a mastery map for
 every concept, a daily plan targets the weakest high-frequency concepts from real past exams, and the
-mentor رفيق steps in after repeated mistakes.*
+practice uses real past-exam questions.*
 
 ---
 
 ## للحكّام · For the judges
 | | |
 |---|---|
-| **تطبيق الأندرويد (APK)** | [Masar.apk · Release v1.0.0](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) |
+| **تطبيق الأندرويد الحالي** | ابنِه من الكود باتباع [دليل التشغيل](docs/RUN.md)؛ نسخة v1.0.0 القديمة أرشيف المسابقة |
 | **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
 | حساب الحكّام (عرض فقط) | `judges@masar-demo.com` · كلمة المرور: `12345678` |
 | **دليل التشغيل الكامل** | [docs/RUN.md](docs/RUN.md) |
@@ -31,7 +31,6 @@ mentor رفيق steps in after repeated mistakes.*
 | **تشخيص قصير** | 8 أسئلة من امتحانات سابقة حقيقية، وبيبيّن صح أو خطأ مع نتيجتك أول بأول. |
 | **خريطة المفاهيم** | نسبة إتقان لكل مفهوم بالمادة، ونسبة **جاهزية** للامتحان. |
 | **خطة اليوم** | أسئلة على المفاهيم الضعيفة، والأولوية للي بيتكرر أكثر بالامتحانات. |
-| **رفيق** | مرشد ذكي بيتدخل إذا غلط الطالب مرتين بنفس المفهوم، وبيشرح من أسئلة الامتحانات الحقيقية. |
 | **خزنة** | بنك امتحانات سابقة كتبويب جوّا التطبيق. |
 | **لوحة الإدارة** | متابعة الطلاب والمواد والأسئلة لحظياً: [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
 
@@ -55,15 +54,14 @@ mentor رفيق steps in after repeated mistakes.*
 |---|---|
 | التطبيق | Flutter (iOS + Android)، Riverpod، go_router، Clean Architecture |
 | الـ backend | Firebase: Firestore، Cloud Functions (TypeScript)، Auth، Hosting |
-| رفيق | نموذج لغوي محلي (Qwen 3.5 9B) على جهاز الفريق |
 | لوحة الإدارة | React + Vite |
 
 ```
 app/        تطبيق Flutter (core · domain · data · presentation)
-functions/  Cloud Functions: محرك التعلّم، الخطة، رفيق
+functions/  Cloud Functions: محرك التعلّم والخطة
 admin/      لوحة الإدارة
 scripts/    تجهيز البيانات واستيرادها
-design/     الأيقونة وصور رفيق
+design/     الأيقونة والهوية البصرية
 docs/       العقد المشترك وحالة المشروع
 ```
 
@@ -73,7 +71,7 @@ docs/       العقد المشترك وحالة المشروع
 
 | الطريقة | |
 |---|---|
-| **APK للأندرويد** | [حمّل Masar.apk](https://github.com/Salahianoo/masar/releases/tag/v1.0.0) وثبّته، بدون أي بناء |
+| **APK للأندرويد** | `flutter build apk --release` من `app/` للنسخة الحالية |
 | **لوحة الإدارة** | [masar-hackathon-jo-2026-salah.web.app](https://masar-hackathon-jo-2026-salah.web.app) |
 | **من الكود** | Flutter 3.47 · JDK 17+ للأندرويد · Xcode للآيفون |
 
@@ -83,9 +81,12 @@ cd masar/app
 flutter pub get
 flutter run                          # التطبيق الكامل مع Firebase (الديمو)
 flutter run --dart-define=LOCAL=true # بدون إنترنت: كل شي على الجهاز
-flutter test                         # 39 اختبار
+flutter test                         # 32 اختبار
 ```
-Firebase جاهز ومعبّى بالبيانات، فما بتحتاج مشروع Firebase خاص فيك.
+قاعدة بيانات مسار كانت مجهّزة بالمواد والأسئلة؛ الوضع المحلي ما يحتاج Firebase.
+**تنبيه:** مشروع Firebase الخاص بمسار رجّع خطأ فوترة 403 بتاريخ 2026-10-10؛ الوضع المحلي `LOCAL=true` شغّال، والوضع المتصل يحتاج إعادة تفعيل فوترة مسار. التفاصيل في [حالة الإزالة](docs/REMOVAL-2026-10-10.md).
+
+العرض ونسخة APK السابقة من المسابقة محفوظان كأرشيف، وفيهما وصف المرشد الذي أُزيل بعد المسابقة. النسخة الحالية من التطبيق لا تتصل بجهاز هاشمي.
 
 ## العرض · Presentation
 [PowerPoint](presentation/Masar-presentation.pptx) · [PDF](presentation/Masar-presentation.pdf)
@@ -93,6 +94,6 @@ Firebase جاهز ومعبّى بالبيانات، فما بتحتاج مشرو
 ## الفريق
 | مين | الشغل |
 |---|---|
-| **صلاح** | رفيق (المرشد الذكي)، الـ backend على Firebase، لوحة الإدارة، وجزء من واجهات التطبيق |
+| **صلاح** | الـ backend على Firebase، لوحة الإدارة، وجزء من واجهات التطبيق؛ صمّم المرشد الذكي لنسخة المسابقة السابقة |
 | **عامر** | أساس التطبيق، التسجيل، التشخيص، الخريطة، الرئيسية، «أنا» |
 | **أسامة** | التمرين، تبويب خزنة، ملخص الجلسة |

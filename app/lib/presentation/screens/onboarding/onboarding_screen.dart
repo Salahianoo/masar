@@ -69,7 +69,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: AppSpacing.xxl),
-              const Center(child: MentorAvatar(pose: MentorPose.wave, size: 128)),
+              Center(child: Icon(Icons.auto_stories_rounded, size: 112, color: AppColors.accent)),
               const SizedBox(height: AppSpacing.lg),
               Text('أهلاً في مسار', style: AppText.title, textAlign: TextAlign.center),
               const SizedBox(height: AppSpacing.sm),

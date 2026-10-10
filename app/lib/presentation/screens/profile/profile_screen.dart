@@ -114,7 +114,6 @@ class ProfileScreen extends ConsumerWidget {
     final name = profile?.displayName ?? 'طالب مسار';
     final enrollments = ref.watch(enrollmentsProvider);
     final subjects = ref.watch(subjectsProvider).value ?? const <Subject>[];
-    final config = ref.watch(configProvider).value;
     final items = enrollments.value ?? const <Enrollment>[];
     final progress = {
       for (final e in items) e.subjectId: ?ref.watch(progressProvider(e.subjectId)).value,
@@ -193,15 +192,6 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.howRating),
           ),
           const SizedBox(height: AppSpacing.md),
-          if (config != null && config.mentorEnabled) ...[
-            ProfileTile(
-              leading: const MentorBadge(size: 36),
-              title: config.mentorName,
-              subtitle: 'مرشدك بالمادة، اسأله أي إشي',
-              onTap: () => context.go(AppRoutes.mentor),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
           ProfileTile(
             leading: Icon(Icons.logout_rounded, color: AppColors.error),
             title: 'تسجيل خروج',
