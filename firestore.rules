@@ -67,6 +67,15 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // The admin dashboard lists every student's subjects and answers with
+    // collection-group queries, which need their own recursive rules.
+    match /{path=**}/enrollments/{id} {
+      allow read: if isAdmin();
+    }
+    match /{path=**}/attempts/{id} {
+      allow read: if isAdmin();
+    }
+
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
 
